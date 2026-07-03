@@ -14,6 +14,9 @@
         </div>
     </div>
 
+    {{-- Toast Container --}}
+    <div id="toast-container" class="fixed top-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
     <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="space-y-5">
         @csrf
         @method('patch')
@@ -41,6 +44,13 @@
                     </label>
                     <input type="file" id="photo" name="photo" accept="image/*" class="hidden">
                     <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">JPG, PNG, maks. 2MB</p>
+                    {{-- Inline notification untuk error foto --}}
+                    <div id="photo-error" class="hidden mt-2 flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl transition-all duration-300 opacity-0 -translate-y-1" role="alert">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                        <span id="photo-error-text"></span>
+                    </div>
                     @error('photo')
                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                     @enderror
@@ -79,7 +89,7 @@
         {{-- Title & Lokasi --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="title">Title / Posisi</label>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="title">Jabatan</label>
                 <input id="title" name="title" type="text" value="{{ old('title', $user->title) }}" placeholder="contoh: Full-Stack Developer"
                     class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600">
                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Muncul di bawah nama di halaman publik.</p>
@@ -114,7 +124,7 @@
         </div>
 
         {{-- Telepon --}}
-        <div>
+        {{-- <div>
             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="phone">Nomor Telepon</label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -127,7 +137,7 @@
             </div>
             <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Opsional. Tidak ditampilkan publik.</p>
             @error('phone')<p class="text-xs text-red-500 mt-1.5">{{ $message }}</p>@enderror
-        </div>
+        </div> --}}
 
         {{-- Submit --}}
         <div class="pt-2">
@@ -152,6 +162,104 @@
         });
     }
 
+    // Toast notification helper
+    function showToast(message, type = 'error') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const colors = {
+            error: {
+                bg: 'bg-red-50 dark:bg-red-500/10',
+                border: 'border-red-200 dark:border-red-500/20',
+                text: 'text-red-700 dark:text-red-300',
+                icon: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z',
+                iconColor: 'text-red-500 dark:text-red-400',
+                progress: 'bg-red-500'
+            },
+            success: {
+                bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+                border: 'border-emerald-200 dark:border-emerald-500/20',
+                text: 'text-emerald-700 dark:text-emerald-300',
+                icon: 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+                iconColor: 'text-emerald-500 dark:text-emerald-400',
+                progress: 'bg-emerald-500'
+            },
+            warning: {
+                bg: 'bg-amber-50 dark:bg-amber-500/10',
+                border: 'border-amber-200 dark:border-amber-500/20',
+                text: 'text-amber-700 dark:text-amber-300',
+                icon: 'M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z',
+                iconColor: 'text-amber-500 dark:text-amber-400',
+                progress: 'bg-amber-500'
+            }
+        };
+
+        const c = colors[type] || colors.error;
+
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto relative overflow-hidden flex items-start gap-3 px-4 py-3 ${c.bg} border ${c.border} rounded-xl shadow-lg shadow-black/5 backdrop-blur-sm transition-all duration-300 opacity-0 translate-x-4 max-w-sm`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <svg class="w-5 h-5 shrink-0 mt-0.5 ${c.iconColor}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}" />
+            </svg>
+            <p class="text-sm font-medium ${c.text} leading-snug">${message}</p>
+            <button onclick="this.closest('[role=alert]').remove()" class="shrink-0 ml-1 p-0.5 rounded-lg ${c.text} opacity-40 hover:opacity-100 transition-opacity duration-200 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="absolute bottom-0 left-0 h-0.5 ${c.progress} transition-all duration-[4000ms] ease-linear" style="width: 100%"></div>
+        `;
+
+        container.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0', 'translate-x-4');
+            toast.classList.add('opacity-100', 'translate-x-0');
+        });
+
+        // Animate progress bar shrinking
+        requestAnimationFrame(() => {
+            const bar = toast.querySelector('[class*="bottom-0"]');
+            if (bar) {
+                requestAnimationFrame(() => { bar.style.width = '0%'; });
+            }
+        });
+
+        // Auto remove after 4s
+        setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-x-0');
+            toast.classList.add('opacity-0', 'translate-x-4');
+            toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+        }, 4000);
+    }
+
+    // Inline photo error helper
+    function showPhotoError(message) {
+        const el = document.getElementById('photo-error');
+        const text = document.getElementById('photo-error-text');
+        if (!el || !text) return;
+        text.textContent = message;
+        el.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            el.classList.remove('opacity-0', '-translate-y-1');
+            el.classList.add('opacity-100', 'translate-y-0');
+        });
+        // Auto-hide setelah 5 detik
+        clearTimeout(el._hideTimer);
+        el._hideTimer = setTimeout(() => hidePhotoError(), 5000);
+    }
+
+    function hidePhotoError() {
+        const el = document.getElementById('photo-error');
+        if (!el) return;
+        el.classList.remove('opacity-100', 'translate-y-0');
+        el.classList.add('opacity-0', '-translate-y-1');
+        el.addEventListener('transitionend', () => el.classList.add('hidden'), { once: true });
+    }
+
     // Photo preview
     const photoInput = document.getElementById('photo');
     const photoWrapper = document.getElementById('photo-preview-wrapper');
@@ -159,11 +267,18 @@
         photoInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Sembunyikan error sebelumnya kalau ada
+            hidePhotoError();
+
             if (file.size > 2 * 1024 * 1024) {
                 photoInput.value = '';
-                alert('Ukuran foto maksimal 2MB.');
+                // Tampilkan inline error + toast
+                showPhotoError('Ukuran foto melebihi batas 2MB. Silakan pilih file lain.');
+                showToast('Ukuran foto maksimal 2MB.', 'error');
                 return;
             }
+
             const reader = new FileReader();
             reader.onload = (ev) => {
                 photoWrapper.innerHTML = '<img src="' + ev.target.result + '" alt="Preview" class="w-20 h-20 rounded-2xl object-cover border-2 border-white/60 dark:border-white/10 shadow-lg">';

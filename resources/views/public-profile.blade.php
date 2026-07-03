@@ -63,7 +63,7 @@
             animation: orb-drift-2 30s ease-in-out infinite;
         }
         .orb-3 {
-            top-[50%]; left-[35%];
+            top:[50%]; left:[35%];
             width: 350px; height: 350px;
             background: radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%);
             animation: orb-drift-3 20s ease-in-out infinite;
@@ -287,6 +287,52 @@
             transform: translateX(100%);
         }
 
+        /* ═══ Skill bar (public profile) ═══ */
+        .skill-bar-track {
+            height: 6px;
+            background: rgba(148,163,184,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .dark .skill-bar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        .skill-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            width: 0%;
+            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+        }
+        .skill-bar-high {
+            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+            box-shadow: 0 0 8px rgba(14,165,233,0.2);
+        }
+        .skill-bar-mid {
+            background: linear-gradient(90deg, #7dd3fc, #38bdf8);
+        }
+        .skill-bar-low {
+            background: #cbd5e1;
+        }
+        .dark .skill-bar-low {
+            background: #475569;
+        }
+        .reveal.visible .skill-bar-fill {
+            width: var(--w, 0%);
+        }
+
+        /* ═══ Resume embed ═══ */
+        .resume-embed {
+            opacity: 0;
+            transition: opacity 0.6s ease 0.5s;
+        }
+        .reveal.visible .resume-embed {
+            opacity: 1;
+        }
+        .resume-embed iframe {
+            border: none;
+            display: block;
+        }
+
         /* ═══ Link card ═══ */
         .link-card {
             position: relative;
@@ -507,11 +553,20 @@
                             <div class="accent-line mb-3"></div>
                             <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Skills</h2>
                         </div>
-                        <div class="stagger flex flex-wrap gap-2.5">
+                        <div class="space-y-3">
                             @foreach($skills as $skill)
-                                <span class="skill-tag px-4 py-2.5 text-[13px] font-medium text-slate-600 dark:text-slate-300 glass rounded-2xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-sky-500/5 cursor-default transition-colors duration-500">
-                                    {{ $skill->name }}
-                                </span>
+                                <div class="glass rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/[0.03]">
+                                    <div class="flex items-center justify-between mb-2.5">
+                                        <span class="text-[14px] font-medium text-slate-700 dark:text-slate-200 transition-colors duration-300">{{ $skill->name }}</span>
+                                        <span class="text-xs font-semibold tabular-nums transition-colors duration-300 @if($skill->percentage >= 80) text-sky-500 dark:text-sky-400 @elseif($skill->percentage >= 50) text-slate-500 dark:text-slate-400 @else text-slate-400 dark:text-slate-500 @endif">{{ $skill->percentage }}%</span>
+                                    </div>
+                                    <div class="skill-bar-track">
+                                        <div
+                                            class="skill-bar-fill @if($skill->percentage >= 80) skill-bar-high @elseif($skill->percentage >= 50) skill-bar-mid @else skill-bar-low @endif"
+                                            style="--w: {{ $skill->percentage }}%"
+                                        ></div>
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
                     </section>
@@ -583,6 +638,62 @@
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                {{-- Resume --}}
+                @if($user->resume_path)
+                    @php
+                        try {
+                            $resumeSize = round(Storage::disk('public')->size($user->resume_path) / 1024, 1);
+                            $resumeSizeLabel = $resumeSize >= 1024
+                                ? round($resumeSize / 1024, 1) . ' MB'
+                                : $resumeSize . ' KB';
+                        } catch (\Exception $e) {
+                            $resumeSizeLabel = 'PDF Document';
+                        }
+                    @endphp
+                    <section class="mb-16 lg:mb-20 reveal section-glow pt-8">
+                        <div class="mb-6">
+                            <div class="accent-line mb-3"></div>
+                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Resume</h2>
+                        </div>
+                        <div class="glass rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/[0.03]">
+                            {{-- Header --}}
+                            <div class="p-5 flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3.5 min-w-0">
+                                    <div class="w-11 h-11 shrink-0 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/15 flex items-center justify-center transition-colors duration-300">
+                                        <svg class="w-5 h-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate transition-colors duration-300">{{ basename($user->resume_path) }}</p>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500 transition-colors duration-300">{{ $resumeSizeLabel }}</p>
+                                    </div>
+                                </div>
+                                <a
+                                    href="{{ asset('storage/' . $user->resume_path) }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition-all duration-200 active:scale-[0.97] shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                    </svg>
+                                    Buka PDF
+                                </a>
+                            </div>
+                            {{-- PDF Preview --}}
+                            <div class="resume-embed border-t border-white/20 dark:border-white/[0.04]">
+                                <iframe
+                                    src="{{ asset('storage/' . $user->resume_path) }}#toolbar=0&navpanes=0&scrollbar=1"
+                                    class="w-full h-[400px] sm:h-[500px] lg:h-[560px] bg-white dark:bg-slate-900"
+                                    loading="lazy"
+                                    title="Preview resume {{ $user->name }}"
+                                ></iframe>
+                            </div>
                         </div>
                     </section>
                 @endif

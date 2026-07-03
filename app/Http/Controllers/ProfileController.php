@@ -87,10 +87,14 @@ class ProfileController extends Controller
 
     public function storeSkill(Request $request): RedirectResponse
     {
-        $request->validate(['name' => 'required|string|max:50']);
+        $request->validate([
+            'name'       => 'required|string|max:50',
+            'percentage' => 'required|integer|min:1|max:100',
+        ]);
 
         $request->user()->skills()->create([
             'name'       => $request->name,
+            'percentage' => $request->percentage,
             'sort_order' => ($request->user()->skills()->max('sort_order') ?? 0) + 1,
         ]);
 
@@ -102,7 +106,7 @@ class ProfileController extends Controller
         Skill::where('id', $id)->where('user_id', Auth::id())->delete();
         return Redirect::route('profile.edit', '#keahlian')->with('success', 'Keahlian dihapus.');
     }
-
+    
     // ── Portfolio ──
 
     public function storePortfolio(Request $request): RedirectResponse
@@ -158,6 +162,40 @@ class ProfileController extends Controller
     {
         Testimonial::where('id', $id)->where('user_id', Auth::id())->delete();
         return Redirect::route('profile.edit', '#testimoni')->with('success', 'Testimoni dihapus.');
+    }
+
+    // ── Resume ──
+
+    public function updateResume(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'resume' => 'required|file|mimes:pdf|max:2048',
+        ]);
+
+        $user = $request->user();
+
+        // Hapus file lama jika ada (replace)
+        if ($user->resume_path) {
+            Storage::disk('public')->delete($user->resume_path);
+        }
+
+        $user->resume_path = $request->file('resume')->store('resumes', 'public');
+        $user->save();
+
+        return Redirect::route('profile.edit', '#resume')->with('success', 'Resume berhasil diupload.');
+    }
+
+    public function destroyResume(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->resume_path) {
+            Storage::disk('public')->delete($user->resume_path);
+            $user->resume_path = null;
+            $user->save();
+        }
+
+        return Redirect::route('profile.edit', '#resume')->with('success', 'Resume dihapus.');
     }
 
     // ── Public ──

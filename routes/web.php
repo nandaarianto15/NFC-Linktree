@@ -37,6 +37,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/profile/testimonials', [ProfileController::class, 'storeTestimonial'])->name('testimonials.store');
     Route::delete('/profile/testimonials/{testimonial}', [ProfileController::class, 'destroyTestimonial'])->name('testimonials.destroy');
+
+    Route::put('/profile/resume', [ProfileController::class, 'updateResume'])->name('resume.update');
+    Route::delete('/profile/resume', [ProfileController::class, 'destroyResume'])->name('resume.destroy');
 });
 
 Route::get('/p/{token}', [ProfileController::class, 'showPublicProfile'])->name('public.profile');
