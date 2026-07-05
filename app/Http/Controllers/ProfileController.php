@@ -9,6 +9,8 @@ use App\Models\Experience;
 use App\Models\Skill;
 use App\Models\Portfolio;
 use App\Models\Testimonial;
+use App\Models\Service;
+use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,7 @@ class ProfileController extends Controller
 {
     public function edit(Request $request): View
     {
-        $request->user()->load(['experiences', 'skills', 'portfolios', 'testimonials']);
+        $request->user()->load(['experiences', 'skills', 'portfolios', 'testimonials', 'services', 'clients']);
         return view('profile.edit', ['user' => $request->user()]);
     }
 
@@ -198,12 +200,67 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit', '#resume')->with('success', 'Resume dihapus.');
     }
 
+    // ── Service ──
+
+    public function storeService(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'title'       => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        $request->user()->services()->create($request->only('title', 'description') + [
+            'sort_order' => ($request->user()->services()->max('sort_order') ?? 0) + 1,
+        ]);
+
+        return Redirect::route('profile.edit', '#layanan')->with('success', 'Layanan ditambahkan.');
+    }
+
+    public function destroyService(int $id): RedirectResponse
+    {
+        Service::where('id', $id)->where('user_id', Auth::id())->delete();
+        return Redirect::route('profile.edit', '#layanan')->with('success', 'Layanan dihapus.');
+    }
+
+    // ── Client ──
+
+    public function storeClient(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'logo' => 'nullable|image|max:2048',
+        ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('clients', 'public');
+        }
+
+        $request->user()->clients()->create([
+            'name'       => $request->name,
+            'logo_path'  => $logoPath,
+            'sort_order' => ($request->user()->clients()->max('sort_order') ?? 0) + 1,
+        ]);
+
+        return Redirect::route('profile.edit', '#klien')->with('success', 'Klien ditambahkan.');
+    }
+
+    public function destroyClient(int $id): RedirectResponse
+    {
+        $client = Client::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        if ($client->logo_path) {
+            Storage::disk('public')->delete($client->logo_path);
+        }
+        $client->delete();
+        return Redirect::route('profile.edit', '#klien')->with('success', 'Klien dihapus.');
+    }
+
     // ── Public ──
 
     public function showPublicProfile(string $token)
     {
         $user = User::where('profile_token', $token)
-            ->with(['experiences', 'skills', 'portfolios', 'testimonials'])
+            ->with(['experiences', 'skills', 'portfolios', 'testimonials', 'services', 'clients'])
             ->firstOrFail();
 
         return view('public-profile', [
@@ -212,7 +269,8 @@ class ProfileController extends Controller
             'experiences'  => $user->experiences,
             'skills'       => $user->skills,
             'portfolios'   => $user->portfolios,
-            // 'testimonials' => $user->testimonials,
+            'services'     => $user->services,
+            'clients'      => $user->clients,
         ]);
     }
 }

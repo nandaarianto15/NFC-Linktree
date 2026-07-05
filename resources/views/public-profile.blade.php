@@ -3,816 +3,973 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $user->title ? $user->name . ' | ' . $user->title : $user->name . ' | NFC Link' }}</title>
+    <title>{{ $user->title ? $user->name . ' | ' . $user->title : 'Profil Pengguna' }}</title>
+    <meta name="description" content="{{ $user->bio ?? 'Profil Portofolio Digital' }}">
 
-    <meta name="description" content="{{ $user->bio ?? $user->name . ' digital profile' }}">
-
+    <!-- Google Fonts: Bebas Neue & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN with Blue Theme Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
-        if (!localStorage.getItem('theme')) {
-            document.documentElement.classList.add('dark');
-        } else if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        bebas: ['Bebas Neue', 'sans-serif'],
+                    },
+                    colors: {
+                        mist: {
+                            50: '#fcfdfe',    // Warm Pristine White
+                            100: '#f4f6fa',   // Mist Alabaster Main Background
+                            200: '#eaedf4',   // Sidebar Background
+                            300: '#d5dae6',   // Border lines
+                            400: '#a3b0cc',
+                        },
+                        ink: {
+                            900: '#0f172a',   // Deep Slate/Navy Black for text
+                            800: '#1e293b',   // Subtitle text
+                            700: '#475569',   // Body text
+                            500: '#64748b',   // Muted text
+                        },
+                        cobalt: {
+                            DEFAULT: '#1d4ed8', // Darker Cobalt Blue
+                            dark: '#1e3a8a',
+                            light: '#eff6ff',
+                        },
+                        futura: {
+                            DEFAULT: '#0284c7', // Sky Blue/Cyan Blue (Replacing the former emerald teal)
+                            dark: '#0369a1',
+                            light: '#f0f9ff',
+                        }
+                    }
+                }
+            }
         }
     </script>
 
     <style>
-        /* Noise texture */
-        .noise::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            opacity: 0.015;
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-            background-size: 200px 200px;
+        /* Custom Premium Blue Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #eaedf4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1d4ed8;
+            border-radius: 99px;
         }
 
-        /* Reveal */
-        .reveal {
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* Ambient Analytical Grid Overlays with soft Blue tint */
+        .analytic-grid {
+            background-image: 
+                linear-gradient(rgba(29, 78, 216, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(29, 78, 216, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
 
-        /* ═══ Floating background orbs ═══ */
-        .orb {
-            position: absolute;
-            border-radius: 9999px;
-            will-change: transform;
-        }
-        .orb-1 {
-            -top-[20%]; -right-[15%];
-            width: 650px; height: 650px;
-            background: radial-gradient(circle, rgba(14,165,233,0.08), transparent 70%);
-            animation: orb-drift-1 25s ease-in-out infinite;
-        }
-        .orb-2 {
-            -bottom-[25%]; -left-[20%];
-            width: 750px; height: 750px;
-            background: radial-gradient(circle, rgba(14,165,233,0.06), transparent 70%);
-            animation: orb-drift-2 30s ease-in-out infinite;
-        }
-        .orb-3 {
-            top:[50%]; left:[35%];
-            width: 350px; height: 350px;
-            background: radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%);
-            animation: orb-drift-3 20s ease-in-out infinite;
-        }
-        .dark .orb-1 { background: radial-gradient(circle, rgba(14,165,233,0.04), transparent 70%); }
-        .dark .orb-2 { background: radial-gradient(circle, rgba(14,165,233,0.03), transparent 70%); }
-        .dark .orb-3 { background: radial-gradient(circle, rgba(99,102,241,0.025), transparent 70%); }
-
-        @keyframes orb-drift-1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(-40px, 30px) scale(1.05); }
-            50% { transform: translate(-20px, -20px) scale(0.97); }
-            75% { transform: translate(30px, 15px) scale(1.03); }
-        }
-        @keyframes orb-drift-2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(35px, -25px) scale(1.04); }
-            66% { transform: translate(-25px, 20px) scale(0.96); }
-        }
-        @keyframes orb-drift-3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            20% { transform: translate(20px, -30px) scale(1.08); }
-            40% { transform: translate(-15px, 10px) scale(0.95); }
-            60% { transform: translate(25px, 20px) scale(1.05); }
-            80% { transform: translate(-10px, -15px) scale(0.98); }
+        /* Topographic / Mathematical Matrix background for sidebar in blue */
+        .matrix-bg {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg stroke='%231d4ed8' stroke-opacity='0.04' stroke-width='1'%3E%3Ccircle cx='50' cy='50' r='40' fill='none'/%3E%3Cpath d='M10 50h80M50 10v80'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 80px 80px;
         }
 
-        /* ═══ Floating particles ═══ */
-        .particle {
-            position: absolute;
-            border-radius: 9999px;
-            pointer-events: none;
-            opacity: 0;
-            animation: particle-float linear infinite;
+        /* Fluid Soft Shadow */
+        .premium-shadow {
+            box-shadow: 
+                0 4px 30px rgba(15, 23, 42, 0.02),
+                0 1px 3px rgba(29, 78, 216, 0.05);
         }
-        @keyframes particle-float {
-            0% { opacity: 0; transform: translateY(0) scale(0); }
-            10% { opacity: 1; transform: scale(1); }
-            90% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(-100vh) scale(0.5); }
+        .card-shadow-hover:hover {
+            box-shadow: 
+                0 20px 40px rgba(29, 78, 216, 0.06),
+                0 1px 4px rgba(29, 78, 216, 0.03);
         }
 
-        /* ═══ Mouse spotlight ═══ */
-        .mouse-spotlight {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            border-radius: 9999px;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-            background: radial-gradient(circle, rgba(14,165,233,0.06), transparent 60%);
-            transform: translate(-50%, -50%);
-        }
-        .dark .mouse-spotlight {
-            background: radial-gradient(circle, rgba(14,165,233,0.04), transparent 60%);
-        }
-        .mouse-spotlight.active { opacity: 1; }
-
-        /* ═══ Avatar ring ═══ */
-        .avatar-wrap { position: relative; perspective: 800px; }
-        .avatar-wrap::before {
-            content: '';
-            position: absolute;
-            inset: -5px;
-            border-radius: 9999px;
-            background: conic-gradient(from 0deg, #0ea5e9, #38bdf8, #7dd3fc, #0ea5e9, #0284c7, #0ea5e9);
-            animation: ring-spin 8s linear infinite;
-            z-index: 0;
-            opacity: 0.7;
-            box-shadow:
-                0 2px 6px rgba(14,165,233,0.35),
-                0 8px 20px rgba(14,165,233,0.12),
-                inset 0 1px 2px rgba(255,255,255,0.4);
-        }
-        .dark .avatar-wrap::before {
-            box-shadow:
-                0 2px 8px rgba(14,165,233,0.25),
-                0 8px 24px rgba(14,165,233,0.08),
-                inset 0 1px 2px rgba(255,255,255,0.1);
-        }
-        .avatar-wrap::after {
-            content: '';
-            position: absolute;
-            inset: -24px;
-            border-radius: 9999px;
-            background: radial-gradient(circle, rgba(14,165,233,0.12), transparent 65%);
-            z-index: -1;
-            animation: ring-pulse 4s ease-in-out infinite alternate;
-        }
-        @keyframes ring-spin { to { transform: rotate(360deg); } }
-        @keyframes ring-pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.08); } }
-
-        /* ═══ Avatar 3D ═══ */
-        .avatar-3d {
-            position: relative;
-            z-index: 1;
-            box-shadow:
-                -3px -3px 6px rgba(255,255,255,0.6),
-                -1px -1px 2px rgba(255,255,255,0.3),
-                4px 4px 8px rgba(148,163,184,0.18),
-                8px 8px 16px rgba(148,163,184,0.1),
-                inset 0 2px 6px rgba(255,255,255,0.5),
-                inset 0 -3px 6px rgba(148,163,184,0.08);
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .avatar-3d:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow:
-                -5px -5px 10px rgba(255,255,255,0.7),
-                -2px -2px 4px rgba(255,255,255,0.35),
-                6px 6px 12px rgba(148,163,184,0.22),
-                14px 14px 28px rgba(148,163,184,0.14),
-                inset 0 2px 6px rgba(255,255,255,0.55),
-                inset 0 -3px 6px rgba(148,163,184,0.1);
-        }
-        .dark .avatar-3d {
-            box-shadow:
-                -3px -3px 6px rgba(255,255,255,0.04),
-                -1px -1px 2px rgba(255,255,255,0.02),
-                4px 4px 8px rgba(0,0,0,0.5),
-                8px 8px 16px rgba(0,0,0,0.35),
-                inset 0 2px 6px rgba(255,255,255,0.06),
-                inset 0 -3px 6px rgba(0,0,0,0.35);
-        }
-        .dark .avatar-3d:hover {
-            box-shadow:
-                -5px -5px 10px rgba(255,255,255,0.05),
-                -2px -2px 4px rgba(255,255,255,0.025),
-                6px 6px 12px rgba(0,0,0,0.55),
-                14px 14px 28px rgba(0,0,0,0.4),
-                inset 0 2px 6px rgba(255,255,255,0.08),
-                inset 0 -3px 6px rgba(0,0,0,0.4);
-        }
-        .avatar-3d::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 9999px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 25%, transparent 45%, transparent 70%, rgba(0,0,0,0.04) 100%);
-            pointer-events: none;
-            z-index: 2;
-        }
-        .dark .avatar-3d::after {
-            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 25%, transparent 45%, transparent 70%, rgba(0,0,0,0.15) 100%);
+        /* Smooth Transition */
+        .smooth-transition {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ═══ Glass card base ═══ */
-        .glass {
-            background: rgba(255,255,255,0.45);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255,255,255,0.35);
-            transition: border-color 0.4s ease, box-shadow 0.4s ease;
-        }
-        .dark .glass {
-            background: rgba(255,255,255,0.02);
-            border-color: rgba(255,255,255,0.06);
-        }
-
-        /* ═══ Animated accent line ═══ */
-        .accent-line {
-            width: 24px;
-            height: 2px;
-            border-radius: 9999px;
-            background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-            position: relative;
-            overflow: hidden;
-        }
-        .accent-line::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
-            animation: accent-shimmer 3s ease-in-out infinite;
-        }
-        @keyframes accent-shimmer {
-            0%, 100% { left: -100%; }
-            50% { left: 200%; }
-        }
-
-        /* ═══ Experience card left border ═══ */
-        .exp-card {
-            position: relative;
-            padding-left: 18px;
-        }
-        .exp-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 12px;
-            bottom: 12px;
-            width: 2px;
-            border-radius: 9999px;
-            background: linear-gradient(to bottom, #0ea5e9, rgba(14,165,233,0.06));
-            transition: box-shadow 0.4s ease;
-        }
-        .exp-card:hover::before {
-            box-shadow: 0 0 8px rgba(14,165,233,0.3), 0 0 16px rgba(14,165,233,0.1);
-        }
-
-        /* ═══ Skill tag ═══ */
-        .skill-tag {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .skill-tag::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.08), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
-        .skill-tag:hover::after {
-            transform: translateX(100%);
-        }
-
-        /* ═══ Skill bar (public profile) ═══ */
+        /* Skill tracking fills customized for blue harmony */
         .skill-bar-track {
-            height: 6px;
-            background: rgba(148,163,184,0.1);
+            width: 100%;
+            height: 8px;
+            background-color: #eaedf4;
             border-radius: 9999px;
             overflow: hidden;
-        }
-        .dark .skill-bar-track {
-            background: rgba(255,255,255,0.05);
         }
         .skill-bar-fill {
             height: 100%;
             border-radius: 9999px;
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+            width: var(--w, 0%);
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .skill-bar-high {
-            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-            box-shadow: 0 0 8px rgba(14,165,233,0.2);
+            background-color: #1d4ed8;
         }
         .skill-bar-mid {
-            background: linear-gradient(90deg, #7dd3fc, #38bdf8);
+            background-color: #0284c7;
         }
         .skill-bar-low {
-            background: #cbd5e1;
-        }
-        .dark .skill-bar-low {
-            background: #475569;
-        }
-        .reveal.visible .skill-bar-fill {
-            width: var(--w, 0%);
-        }
-
-        /* ═══ Resume embed ═══ */
-        .resume-embed {
-            opacity: 0;
-            transition: opacity 0.6s ease 0.5s;
-        }
-        .reveal.visible .resume-embed {
-            opacity: 1;
-        }
-        .resume-embed iframe {
-            border: none;
-            display: block;
-        }
-
-        /* ═══ Link card ═══ */
-        .link-card {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .link-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.5), transparent);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .link-card:hover::before { opacity: 1; }
-
-        /* ═══ Card 3D tilt ═══ */
-        .tilt-card {
-            transform-style: preserve-3d;
-            transition: transform 0.15s ease-out, box-shadow 0.3s ease;
-        }
-        .tilt-card .tilt-inner {
-            transform: translateZ(0);
-            transition: transform 0.15s ease-out;
-        }
-
-        /* ═══ Portfolio ═══ */
-        .port-img {
-            transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .port-card:hover .port-img {
-            transform: scale(1.08);
-        }
-
-        /* ═══ Scrollbar ═══ */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.12); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.25); }
-
-        /* ═══ Stagger children ═══ */
-        .stagger > * {
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .stagger.visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(2) { transition-delay: 60ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(3) { transition-delay: 120ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(4) { transition-delay: 180ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(5) { transition-delay: 240ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(6) { transition-delay: 300ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(7) { transition-delay: 360ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(8) { transition-delay: 420ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(9) { transition-delay: 480ms; opacity: 1; transform: translateY(0); }
-        .stagger.visible > *:nth-child(10) { transition-delay: 540ms; opacity: 1; transform: translateY(0); }
-
-        /* ═══ Subtle grid pattern ═══ */
-        .bg-grid {
-            background-image:
-                linear-gradient(rgba(148,163,184,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(148,163,184,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-        }
-        .dark .bg-grid {
-            background-image:
-                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-        }
-
-        /* ═══ Horizontal separator glow ═══ */
-        .section-glow {
-            position: relative;
-        }
-        .section-glow::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 10%;
-            right: 10%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(14,165,233,0.15), transparent);
+            background-color: #94a3b8;
         }
     </style>
 </head>
+<body class="min-h-screen bg-mist-100 font-sans antialiased text-ink-800 selection:bg-cobalt selection:text-white analytic-grid">
 
-<body class="min-h-[100dvh] relative overflow-x-hidden font-['Inter',sans-serif] antialiased bg-[#fafbfc] dark:bg-[#070a0f] transition-colors duration-700 noise bg-grid">
-
-    {{-- ── Mouse spotlight ── --}}
-    <div class="mouse-spotlight" id="spotlight"></div>
-
-    {{-- ── Animated background ── --}}
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
-
-    {{-- ── Floating particles container ── --}}
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none" id="particles"></div>
-
-    <button
-        onclick="toggleTheme()"
-        class="fixed top-5 right-5 z-50 w-9 h-9 rounded-full glass flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 hover:bg-white/70 dark:hover:bg-white/[0.06]"
-        aria-label="Toggle theme"
-    >
-        <svg class="w-4 h-4 text-slate-400 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-        </svg>
-        <svg class="w-4 h-4 text-sky-300/60 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-        </svg>
-    </button>
-
-    <main class="relative z-10 max-w-5xl mx-auto px-6 pt-24 sm:pt-32 pb-12">
-
-        {{-- ═══════════ HERO ═══════════ --}}
-        <section class="mb-16 lg:mb-20 reveal">
-            <div class="flex flex-col items-center text-center lg:flex-row lg:items-center lg:text-left lg:gap-12">
-                <div class="avatar-wrap shrink-0 mb-8 lg:mb-0">
-                    @if($user->profile_photo_path)
-                        <img
-                            src="{{ asset('storage/' . $user->profile_photo_path) }}"
-                            alt="{{ $user->name }}"
-                            class="avatar-3d w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] rounded-full object-cover"
-                        >
-                    @else
-                        <div class="avatar-3d w-[120px] h-[120px] lg:w-[140px] lg:h-[140px] rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-4xl lg:text-5xl font-extrabold text-white overflow-hidden">
-                            {{ strtoupper(substr($user->name, 0, 2)) }}
-                        </div>
-                    @endif
-                </div>
-
-                <div class="min-w-0 flex-1">
-                    <h1 class="text-[2.5rem] sm:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 dark:text-white tracking-[-0.03em] leading-[1.1] transition-colors duration-500">
-                        {{ $user->name }}
-                    </h1>
-
-                    @if($user->title)
-                        <div class="inline-flex items-center gap-2.5 mt-4 lg:mt-5 px-5 py-2 rounded-full bg-sky-50/70 dark:bg-sky-500/[0.07] border border-sky-100/50 dark:border-sky-500/12 transition-colors duration-500">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-60"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
-                            </span>
-                            <span class="text-[13px] font-medium text-sky-600 dark:text-sky-400/80 tracking-wide transition-colors duration-500">{{ $user->title }}</span>
-                        </div>
-                    @endif
-
-                    @if($user->location)
-                        <div class="flex items-center justify-center lg:justify-start gap-1.5 mt-3 text-slate-400 dark:text-slate-500 transition-colors duration-500">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
-                            <span class="text-[13px]">{{ $user->location }}</span>
-                        </div>
-                    @endif
-
-                    @if($user->bio)
-                        <p class="mt-5 lg:mt-6 text-[15px] sm:text-base text-slate-500 dark:text-slate-400/70 max-w-md mx-auto lg:max-w-none leading-[1.8] transition-colors duration-500">
-                            {{ $user->bio }}
-                        </p>
-                    @endif
+    <!-- MOBILE SIDEBAR DRAWER (Hidden on Desktop, used only for Mobile Menu Drawer) -->
+    <aside id="sidebarDrawer" class="fixed inset-y-0 left-0 z-50 w-80 bg-mist-200 border-r border-mist-300 matrix-bg flex flex-col justify-between p-6 overflow-y-auto transform -translate-x-full lg:hidden smooth-transition shadow-2xl">
+        
+        <div class="space-y-8">
+            <!-- Profile / Logo Block -->
+            <div class="flex items-center gap-4 border-b border-mist-300 pb-6">
+                <div class="flex flex-col">
+                    <span id="sideName" class="font-bebas tracking-wider text-ink-900 text-2xl leading-none">{{ $user->name ?? 'Belum ada nama' }}</span>
+                    <span id="sideTitle" class="text-[9px] font-extrabold uppercase tracking-widest text-futura mt-1">{{ $user->title ?? 'Belum ada jabatan' }}</span>
                 </div>
             </div>
-        </section>
 
-        {{-- ═══════════ CONTENT ═══════════ --}}
-        @php $hasLinks = $links->isNotEmpty(); @endphp
+            <!-- Vertical Navigation Links -->
+            <nav class="space-y-1.5 font-bold text-xs uppercase tracking-widest text-ink-700">
+                <a href="#hero" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl bg-mist-50 text-cobalt border border-mist-300/60 premium-shadow transition-all">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="#services" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Services</span>
+                </a>
+                <a href="#skills" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    <span>Skills</span>
+                </a>
+                <a href="#experiences" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Experiences</span>
+                </a>
+                <a href="#portfolio" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Portfolio</span>
+                </a>
+                <a href="#testimonials" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span>Clients</span>
+                </a>
+                <a href="#contact" onclick="toggleMobileSidebar()" class="group flex items-center gap-3.5 px-4 py-3 rounded-xl hover:bg-mist-50 hover:text-cobalt transition-all">
+                    <svg class="w-4 h-4 text-ink-500 group-hover:text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>Contact</span>
+                </a>
+            </nav>
 
-        <div @if($hasLinks) class="lg:grid lg:grid-cols-12 lg:gap-10 lg:items-start" @endif>
+            <!-- Available for Freelance Projects Card Banner -->
+            <div class="relative bg-gradient-to-tr from-cobalt to-futura text-mist-50 p-5 rounded-2xl premium-shadow space-y-4 overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10 blur-xl"></div>
+                <div class="relative space-y-1.5">
+                    <h4 class="text-[9px] font-extrabold uppercase tracking-[0.2em] text-white/90">Predicting The Future</h4>
+                    <p class="text-xs font-semibold leading-relaxed">Mari realisasikan visi & arsitektur digital Anda dengan kecepatan maksimal.</p>
+                </div>
+                <a href="#contact" onclick="toggleMobileSidebar()" class="inline-flex items-center justify-between w-full px-4 py-2.5 bg-mist-50 text-ink-900 rounded-xl text-[10px] font-extrabold uppercase tracking-widest hover:bg-cobalt-light transition-all">
+                    <span>Hire Me</span>
+                    <svg class="w-3.5 h-3.5 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
 
-            {{-- ─── CONNECT ─── --}}
-            @if($hasLinks)
-                <section class="order-1 lg:order-none lg:col-span-4 xl:col-span-4 mb-12 lg:mb-0 reveal">
-                    <div class="lg:sticky lg:top-28">
-                        <div class="mb-5">
-                            <div class="accent-line mb-3"></div>
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Connect</h2>
-                        </div>
-                        <div class="stagger space-y-2">
-                            @foreach($links as $link)
-                                <a
-                                    href="{{ $link->url }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="link-card tilt-card group flex items-center gap-3.5 w-full px-4 py-3.5 glass rounded-xl shadow-sm shadow-slate-900/[0.02] dark:shadow-black/5 hover:shadow-xl hover:shadow-sky-500/[0.04] hover:-translate-y-0.5 active:scale-[0.985] transition-all duration-300"
-                                >
-                                    <div class="tilt-inner flex items-center gap-3.5 w-full">
-                                        <div class="w-9 h-9 rounded-lg bg-sky-50/80 dark:bg-sky-500/[0.08] border border-sky-100/50 dark:border-sky-500/15 flex items-center justify-center shrink-0 group-hover:bg-sky-100 dark:group-hover:bg-sky-500/15 transition-all duration-300">
-                                            <svg class="w-[18px] h-[18px] text-sky-500 dark:text-sky-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        <!-- Download CV Block inside Mobile Sidebar -->
+        <div class="border-t border-mist-300 pt-6 mt-8 space-y-5">
+            @if(isset($user->resume_path) && $user->resume_path)
+                @php
+                    try {
+                        $resumeSize = round(Storage::disk('public')->size($user->resume_path) / 1024, 1);
+                        $resumeSizeLabel = $resumeSize >= 1024
+                            ? round($resumeSize / 1024, 1) . ' MB'
+                            : $resumeSize . ' KB';
+                    } catch (\Exception $e) {
+                        $resumeSizeLabel = 'PDF Document';
+                    }
+                @endphp
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-[9px] font-extrabold uppercase tracking-widest text-ink-500">
+                        <span>DOWNLOAD RESUME / CV</span>
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </div>
+                    <a href="{{ asset('storage/' . $user->resume_path) }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-4 py-3 bg-mist-50 border border-mist-300 rounded-xl premium-shadow hover:border-cobalt transition-colors">
+                        <svg class="w-5 h-5 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-ink-800 truncate block max-w-[150px]">{{ basename($user->resume_path) }}</span>
+                    </a>
+                </div>
+            @else
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-[9px] font-extrabold uppercase tracking-widest text-ink-500">
+                        <span>DOWNLOAD RESUME / CV</span>
+                    </div>
+                    <div class="px-4 py-3 bg-mist-50 border border-mist-300 rounded-xl text-center italic">
+                        <span class="text-[10px] font-bold text-ink-500">Konten pada bagian ini belum tersedia.</span>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </aside>
+
+    <!-- FLOATING LET'S TALK BUBBLE (MOBILE ONLY) WITH BLUE GRADIENT -->
+    <a href="#contact" class="lg:hidden fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-cobalt to-futura text-mist-50 shadow-2xl hover:scale-110 active:scale-95 transition-all">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+    </a>
+
+    <!-- MAIN GRID SYSTEM -->
+    <div class="relative min-h-screen flex">
+
+        <!-- SCROLLABLE MAIN CONTENT AREA -->
+        <main class="flex-1 min-w-0 flex flex-col justify-between overflow-x-hidden pt-28">
+
+            <!-- DESKTOP NAVBAR (Only visible on Desktop, keeps constant premium size/padding) -->
+            <header id="desktopNavbar" class="hidden lg:flex fixed top-4 inset-x-4 max-w-7xl mx-auto z-40 items-center justify-between border border-mist-300 bg-mist-50/70 backdrop-blur-md px-6 py-4 rounded-2xl premium-shadow">
+                <!-- Left-side Profile Identity matching Sidebar design -->
+                <div class="flex items-center gap-4">
+                    <div class="flex flex-col">
+                        <span class="font-bebas tracking-wider text-ink-900 text-2xl leading-none">{{ $user->name ?? 'Belum ada nama' }}</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-futura mt-1 leading-none">{{ $user->title ?? 'Belum ada jabatan' }}</span>
+                    </div>
+                </div>
+
+                <!-- Middle Anchor Section Links -->
+                <div class="flex items-center gap-8 text-[10px] font-extrabold uppercase tracking-[0.2em] text-ink-700">
+                    <a href="#hero" class="hover:text-cobalt transition-colors">Home</a>
+                    <a href="#services" class="hover:text-cobalt transition-colors">Services</a>
+                    <a href="#skills" class="hover:text-cobalt transition-colors">Skills</a>
+                    <a href="#experiences" class="hover:text-cobalt transition-colors">Experiences</a>
+                    <a href="#portfolio" class="hover:text-cobalt transition-colors">Portfolio</a>
+                    <a href="#testimonials" class="hover:text-cobalt transition-colors">Clients</a>
+                    <a href="#contact" class="hover:text-cobalt transition-colors">Contact</a>
+                </div>
+
+                <!-- Right-side Let's Talk Button -->
+                <div class="flex items-center gap-4">
+                    <a href="#contact" class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-tr from-cobalt to-futura text-mist-50 text-[10px] font-extrabold uppercase tracking-widest hover:scale-105 transition-all shadow-md">
+                        <span>Let's Talk</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </a>
+                </div>
+            </header>
+
+            <!-- MOBILE TOP BAR NAVBAR (Full width on top, shrinks in width upon scrolling) -->
+            <header id="mobileNavbar" class="lg:hidden fixed top-0 left-0 right-0 w-full z-40 flex items-center justify-between border-b border-mist-300 bg-mist-50/80 backdrop-blur-md px-6 py-4 smooth-transition">
+                <!-- Left Identity -->
+                <div class="flex flex-col">
+                    <span class="font-bebas tracking-wider text-ink-900 text-xl leading-none">{{ $user->name ?? 'Belum ada nama' }}</span>
+                    <span class="text-[8px] font-extrabold uppercase tracking-widest text-futura mt-1 leading-none">{{ $user->title ?? 'Belum ada jabatan' }}</span>
+                </div>
+                <!-- Menu Toggle Button -->
+                <button onclick="toggleMobileSidebar()" class="px-4 py-2 bg-ink-900 text-mist-100 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-cobalt transition-colors">
+                    Menu
+                </button>
+            </header>
+
+            <!-- HERO SECTION -->
+            <section id="hero" class="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Hero Texts (Left Side) -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">HELLO, I'M</span>
+                        <h2 id="heroName" class="font-bebas text-6xl md:text-8xl text-ink-900 tracking-wider leading-[0.9]">
+                            {{ $user->name ?? 'Belum ada nama' }}
+                        </h2>
+                        
+                        <p class="font-bebas text-2xl md:text-4xl text-ink-800 leading-tight">
+                            {{ $user->headline ?? 'Konten pada bagian ini belum tersedia.' }}
+                        </p>
+
+                        <p class="text-sm md:text-base text-ink-700 leading-relaxed max-w-xl">
+                            {{ $user->bio ?? 'Konten pada bagian ini belum tersedia.' }}
+                        </p>
+
+                        <!-- Action Buttons and PDF Dynamic Inline Preview -->
+                        <div class="flex flex-col gap-4 pt-4">
+                            <div class="flex flex-wrap gap-4">
+                                <a href="#portfolio" class="inline-flex items-center gap-2.5 px-6 py-3.5 bg-ink-900 hover:bg-cobalt text-mist-100 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg">
+                                    <span>View My Work</span>
+                                    <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </a>
+
+                                <!-- CV Download & Preview toggle button -->
+                                <div class="flex gap-2">
+                                    @if(isset($user->resume_path) && $user->resume_path)
+                                        <a href="{{ asset('storage/' . $user->resume_path) }}" download class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-400 hover:border-cobalt text-ink-800 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all bg-mist-50">
+                                            <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                             </svg>
+                                            <span>Download CV</span>
+                                        </a>
+                                        <button onclick="toggleInlinePdfPreview('{{ asset('storage/' . $user->resume_path) }}')" class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-400 hover:border-futura text-ink-800 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all bg-mist-50">
+                                            <svg class="w-4 h-4 text-futura" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <span id="pdfPreviewBtnText">Preview CV</span>
+                                        </button>
+                                    @else
+                                        <div class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-300 text-ink-500 font-bold text-[10px] uppercase tracking-widest rounded-xl bg-mist-200 italic cursor-not-allowed">
+                                            File CV Belum Tersedia
                                         </div>
-                                        <span class="flex-1 text-[14px] font-medium text-slate-700 dark:text-slate-200 transition-colors duration-300">{{ $link->title }}</span>
-                                        <svg class="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-500 dark:group-hover:text-sky-400 group-hover:translate-x-0.5 transition-all duration-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75" />
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- PDF Inline Expandable Preview Frame (Hidden by Default) -->
+                            <div id="inlinePdfContainer" class="hidden w-full mt-4 bg-white border border-mist-300 rounded-2xl overflow-hidden premium-shadow transition-all duration-500">
+                                <div class="bg-mist-200 px-4 py-3 flex justify-between items-center border-b border-mist-300">
+                                    <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">CV Document Preview</span>
+                                    <button onclick="closeInlinePdfPreview()" class="text-xs text-ink-500 hover:text-ink-900 font-bold">✕ Close</button>
+                                </div>
+                                <div class="w-full aspect-[4/5] sm:h-[600px] bg-slate-100">
+                                    <iframe id="pdfFrame" class="w-full h-full border-0" src=""></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Linktree Row -->
+                        <div class="pt-10 border-t border-mist-300 space-y-4">
+                            <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">My Linktree / Network</span>
+                            <div class="flex flex-wrap items-center gap-6 md:gap-10">
+                                @if(isset($links) && $links->isNotEmpty())
+                                    @foreach($links as $link)
+                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="font-bebas text-lg md:text-xl text-ink-800 hover:text-cobalt tracking-wider uppercase transition-colors duration-300">
+                                            {{ $link->title }}
+                                        </a>
+                                    @endforeach
+                                @else
+                                    <span class="text-sm text-ink-500 italic">Tautan belum tersedia saat ini.</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Banner & Floating Stats (Right Side) -->
+                    <div class="lg:col-span-5 flex justify-center relative">
+                        <!-- Graphic Halo Background Ring in Blue representing orbit/forecasting -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-cobalt/10 to-futura/5 rounded-full filter blur-3xl scale-90 -z-10"></div>
+                        <div class="absolute w-[320px] h-[320px] rounded-full border-2 border-dashed border-cobalt/20 animate-[spin_40s_linear_infinite] top-[10%]"></div>
+                        
+                        <!-- Main Cinematic Wide Portrait -->
+                        <div class="relative w-[280px] h-[350px] md:w-[320px] md:h-[400px] rounded-[32px] overflow-hidden bg-mist-200 border-4 border-mist-50 premium-shadow">
+                            @if(isset($user->profile_photo_path) && $user->profile_photo_path)
+                                <img src="{{ asset('storage/' . $user->profile_photo_path) }}" class="w-full h-full object-cover" alt="{{ $user->name }}">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-center p-4 bg-mist-200">
+                                    <span class="text-xs text-ink-500 italic">Foto profil belum tersedia.</span>
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-gradient-to-t from-ink-900/30 to-transparent"></div>
+                        </div>
+
+                        <!-- Floating Stat Badge -->
+                        <div class="absolute bottom-10 -right-4 bg-mist-50 border border-mist-300 p-4 rounded-2xl premium-shadow flex flex-col items-center justify-center text-center w-28 h-28 transform rotate-6 hover:rotate-0 transition-all duration-500">
+                            <span class="font-bebas text-4xl text-futura leading-none font-bold">{{ $user->experience_years ?? 0 }}+</span>
+                            <span class="text-[9px] font-extrabold text-ink-700 uppercase tracking-widest mt-1">Years Experiences</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- WHAT I DO: SERVICES SECTION -->
+            <section id="services" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
+                <div class="space-y-3 mb-10">
+                    <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">WHAT I DO</span>
+                    <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Services I Offer</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    @if(isset($services) && $services->isNotEmpty())
+                        @foreach($services as $service)
+                            <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl smooth-transition hover:-translate-y-1 premium-shadow card-shadow-hover flex flex-col justify-between">
+                                <div class="space-y-4">
+                                    <div class="w-12 h-12 rounded-xl bg-cobalt/10 border border-cobalt/30 flex items-center justify-center text-cobalt">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l3.75-1.5L16.5 21l-.813-5.096A7.5 7.5 0 109.813 15.904z" />
                                         </svg>
                                     </div>
-                                </a>
-                            @endforeach
+                                    <h4 class="text-base font-extrabold text-ink-900">{{ $service->title }}</h4>
+                                    <p class="text-xs text-ink-700 leading-relaxed">{{ $service->description }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center col-span-full">
+                            <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
                         </div>
+                    @endif
+                </div>
+            </section>
+
+            {{-- Skills --}}
+            @if(isset($skills) && $skills->isNotEmpty())
+                <section id="skills" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full pt-8">
+                    <div class="mb-6">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">MY EXPERTISE</span>
+                        <h2 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Skills</h2>
+                    </div>
+                    <div class="space-y-3">
+                        @foreach($skills as $skill)
+                            <div class="bg-mist-50 border border-mist-300 rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/[0.03]">
+                                <div class="flex items-center justify-between mb-2.5">
+                                    <span class="text-[14px] font-medium text-slate-700 transition-colors duration-300">{{ $skill->name }}</span>
+                                    <span class="text-xs font-semibold tabular-nums transition-colors duration-300 @if($skill->percentage >= 80) text-sky-500 @elseif($skill->percentage >= 50) text-slate-500 @else text-slate-400 @endif">{{ $skill->percentage }}%</span>
+                                </div>
+                                <div class="skill-bar-track">
+                                    <div
+                                        class="skill-bar-fill @if($skill->percentage >= 80) skill-bar-high @elseif($skill->percentage >= 50) skill-bar-mid @else skill-bar-low @endif"
+                                        style="--w: {{ $skill->percentage }}%"
+                                    ></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @else
+                <!-- Empty State for Skills -->
+                <section id="skills" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full pt-8">
+                    <div class="mb-6">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">MY EXPERTISE</span>
+                        <h2 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Skills</h2>
+                    </div>
+                    <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center">
+                        <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
                     </div>
                 </section>
             @endif
 
-            {{-- ─── MAIN CONTENT ─── --}}
-            <div class="order-2 lg:order-none {{ $hasLinks ? 'lg:col-span-8 xl:col-span-8' : '' }}">
-
-                {{-- Skills --}}
-                @if($skills->isNotEmpty())
-                    <section class="mb-16 lg:mb-20 reveal section-glow pt-8">
-                        <div class="mb-6">
-                            <div class="accent-line mb-3"></div>
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Skills</h2>
-                        </div>
-                        <div class="space-y-3">
-                            @foreach($skills as $skill)
-                                <div class="glass rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/[0.03]">
-                                    <div class="flex items-center justify-between mb-2.5">
-                                        <span class="text-[14px] font-medium text-slate-700 dark:text-slate-200 transition-colors duration-300">{{ $skill->name }}</span>
-                                        <span class="text-xs font-semibold tabular-nums transition-colors duration-300 @if($skill->percentage >= 80) text-sky-500 dark:text-sky-400 @elseif($skill->percentage >= 50) text-slate-500 dark:text-slate-400 @else text-slate-400 dark:text-slate-500 @endif">{{ $skill->percentage }}%</span>
+            {{-- Experiences --}}
+            @if(isset($experiences) && $experiences->isNotEmpty())
+                <section id="experiences" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full pt-8">
+                    <div class="mb-6">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">MY JOURNEY</span>
+                        <h2 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Experiences</h2>
+                    </div>
+                    <div class="stagger space-y-4">
+                        @foreach($experiences as $exp)
+                            <div class="exp-card tilt-card bg-mist-50 border border-mist-300 rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/[0.03]">
+                                <div class="tilt-inner">
+                                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 mb-2">
+                                        <h3 class="text-[15px] font-semibold text-slate-800 transition-colors duration-300">{{ $exp->role }}</h3>
+                                        <span class="text-xs font-semibold text-sky-500 whitespace-nowrap tabular-nums transition-colors duration-300">{{ $exp->period }}</span>
                                     </div>
-                                    <div class="skill-bar-track">
-                                        <div
-                                            class="skill-bar-fill @if($skill->percentage >= 80) skill-bar-high @elseif($skill->percentage >= 50) skill-bar-mid @else skill-bar-low @endif"
-                                            style="--w: {{ $skill->percentage }}%"
-                                        ></div>
-                                    </div>
+                                    <p class="text-[13px] font-medium text-slate-400 mb-2.5 transition-colors duration-300">{{ $exp->company }}</p>
+                                    @if($exp->description)
+                                        <p class="text-[13px] text-slate-500 leading-[1.75] transition-colors duration-300">{{ $exp->description }}</p>
+                                    @endif
                                 </div>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @else
+                <!-- Empty State for Experiences -->
+                <section id="experiences" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full pt-8">
+                    <div class="mb-6">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">MY JOURNEY</span>
+                        <h2 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Experiences</h2>
+                    </div>
+                    <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center">
+                        <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
+                    </div>
+                </section>
+            @endif
 
-                {{-- Experiences --}}
-                @if($experiences->isNotEmpty())
-                    <section class="mb-16 lg:mb-20 reveal section-glow pt-8">
-                        <div class="mb-6">
-                            <div class="accent-line mb-3"></div>
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Experiences</h2>
-                        </div>
-                        <div class="stagger space-y-4">
-                            @foreach($experiences as $exp)
-                                <div class="exp-card tilt-card glass rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/[0.03]">
-                                    <div class="tilt-inner">
-                                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 mb-2">
-                                            <h3 class="text-[15px] font-semibold text-slate-800 dark:text-slate-100 transition-colors duration-300">{{ $exp->role }}</h3>
-                                            <span class="text-xs font-semibold text-sky-500 dark:text-sky-400/70 whitespace-nowrap tabular-nums transition-colors duration-300">{{ $exp->period }}</span>
+            <!-- PORTFOLIO SECTION -->
+            @php $hasPortfolios = isset($portfolios) && $portfolios->isNotEmpty(); @endphp
+            <section id="portfolio" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
+                <div class="flex items-end justify-between mb-10">
+                    <div class="space-y-3">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">MY WORK</span>
+                        <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Featured Projects</h3>
+                    </div>
+                    @if($hasPortfolios)
+                        <button onclick="openAllProjectsModal()" class="text-xs font-extrabold tracking-widest text-ink-700 hover:text-cobalt transition-colors uppercase border-b-2 border-futura pb-1">
+                            View All Projects
+                        </button>
+                    @endif
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="portfolioGrid">
+                    @if($hasPortfolios)
+                        @foreach($portfolios as $portfolio)
+                            <div class="group flex flex-col space-y-4">
+                                <div class="relative aspect-[16/10] bg-mist-200 border border-mist-300 rounded-[24px] overflow-hidden premium-shadow">
+                                    @if($portfolio->image_path)
+                                        <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $portfolio->title }}">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-tr from-mist-200 to-mist-300 flex items-center justify-center">
+                                            <svg class="w-12 h-12 text-mist-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
                                         </div>
-                                        <p class="text-[13px] font-medium text-slate-400 dark:text-slate-500 mb-2.5 transition-colors duration-300">{{ $exp->company }}</p>
-                                        @if($exp->description)
-                                            <p class="text-[13px] text-slate-500 dark:text-slate-400/70 leading-[1.75] transition-colors duration-300">{{ $exp->description }}</p>
-                                        @endif
-                                    </div>
+                                    @endif
+                                    @if($portfolio->url)
+                                        <a href="{{ $portfolio->url }}" target="_blank" rel="noopener noreferrer" class="absolute inset-0 bg-ink-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <div class="w-10 h-10 rounded-full bg-mist-50 flex items-center justify-center premium-shadow transform scale-75 group-hover:scale-100 transition-transform">
+                                                <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                </svg>
+                                            </div>
+                                        </a>
+                                    @endif
                                 </div>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
-
-                {{-- Project --}}
-                @if($portfolios->isNotEmpty())
-                    <section class="mb-16 lg:mb-20 reveal section-glow pt-8">
-                        <div class="mb-6">
-                            <div class="accent-line mb-3"></div>
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Project</h2>
-                        </div>
-                        <div class="stagger grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            @foreach($portfolios as $portfolio)
-                                <div class="port-card tilt-card group glass rounded-2xl overflow-hidden transition-all duration-400 hover:shadow-2xl hover:shadow-sky-500/[0.04] hover:-translate-y-1">
-                                    <div class="tilt-inner">
-                                        <div class="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800/30">
-                                            @if($portfolio->image_path)
-                                                <img src="{{ asset('storage/' . $portfolio->image_path) }}" alt="{{ $portfolio->title }}" class="port-img w-full h-full object-cover">
-                                            @else
-                                                <div class="w-full h-full bg-gradient-to-br from-slate-50 to-sky-50 dark:from-slate-800/40 dark:to-sky-500/5 flex items-center justify-center transition-colors duration-500">
-                                                    <svg class="w-10 h-10 text-slate-200 dark:text-sky-500/20" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
-                                                    </svg>
-                                                </div>
-                                            @endif
-                                            @if($portfolio->url)
-                                                <a href="{{ $portfolio->url }}" target="_blank" rel="noopener noreferrer" class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/50 flex items-center justify-center transition-all duration-500">
-                                                    <div class="w-11 h-11 rounded-full bg-white/90 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 scale-60 group-hover:scale-100 transition-all duration-500 shadow-lg">
-                                                        <svg class="w-4 h-4 text-slate-800" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0-6.75-6.75M19.5 12l-6.75 6.75" />
-                                                        </svg>
-                                                    </div>
-                                                </a>
-                                            @endif
-                                        </div>
-                                        <div class="p-4">
-                                            <h3 class="text-[14px] font-semibold text-slate-800 dark:text-slate-100 transition-colors duration-300">{{ $portfolio->title }}</h3>
-                                            @if($portfolio->description)
-                                                <p class="text-[12px] text-slate-400 dark:text-slate-500 mt-1.5 line-clamp-2 leading-relaxed transition-colors duration-300">{{ $portfolio->description }}</p>
-                                            @endif
-                                        </div>
-                                    </div>
+                                <div class="space-y-1.5 px-2">
+                                    <h4 class="text-lg font-extrabold text-ink-900 group-hover:text-cobalt transition-colors">{{ $portfolio->title }}</h4>
+                                    @if($portfolio->description)
+                                        <p class="text-xs text-ink-700 leading-relaxed">{{ $portfolio->description }}</p>
+                                    @endif
                                 </div>
-                            @endforeach
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center col-span-full">
+                            <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
                         </div>
-                    </section>
-                @endif
+                    @endif
+                </div>
+            </section>
 
-                {{-- Resume --}}
-                @if($user->resume_path)
-                    @php
-                        try {
-                            $resumeSize = round(Storage::disk('public')->size($user->resume_path) / 1024, 1);
-                            $resumeSizeLabel = $resumeSize >= 1024
-                                ? round($resumeSize / 1024, 1) . ' MB'
-                                : $resumeSize . ' KB';
-                        } catch (\Exception $e) {
-                            $resumeSizeLabel = 'PDF Document';
-                        }
-                    @endphp
-                    <section class="mb-16 lg:mb-20 reveal section-glow pt-8">
-                        <div class="mb-6">
-                            <div class="accent-line mb-3"></div>
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight transition-colors duration-500">Resume</h2>
+            <!-- NUMERICAL IMPACT STATS BAR -->
+            @php 
+                // Menghitung dinamis dari database
+                $totalProjects = isset($portfolios) ? $portfolios->count() : 0;
+                $totalClients = isset($clients) ? $clients->count() : 0;
+                $totalSkills = isset($skills) ? $skills->count() : 0;
+                $totalExp = isset($user->experience_years) ? $user->experience_years : 0;
+            @endphp
+            <section class="max-w-7xl mx-auto px-6 md:px-12 py-10 w-full">
+                <div class="bg-gradient-to-r from-cobalt via-futura to-cobalt text-mist-50 rounded-3xl p-8 md:p-10 premium-shadow">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4 items-center">
+                        
+                        <!-- Stat 1: Projects Completed -->
+                        <div class="flex items-center gap-4 border-r-0 md:border-r border-white/20 last:border-0 pr-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-mist-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bebas text-3xl md:text-4xl font-bold tracking-wider leading-none">{{ $totalProjects }}</span>
+                                <span class="text-[9px] font-extrabold uppercase tracking-widest text-mist-300 mt-1">Projects Done</span>
+                            </div>
                         </div>
-                        <div class="glass rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/[0.03]">
-                            {{-- Header --}}
-                            <div class="p-5 flex items-center justify-between gap-4">
-                                <div class="flex items-center gap-3.5 min-w-0">
-                                    <div class="w-11 h-11 shrink-0 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/15 flex items-center justify-center transition-colors duration-300">
-                                        <svg class="w-5 h-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+
+                        <!-- Stat 2: Happy Clients -->
+                        <div class="flex items-center gap-4 border-r-0 md:border-r border-white/20 last:border-0 pr-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-mist-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bebas text-3xl md:text-4xl font-bold tracking-wider leading-none">{{ $totalClients }}</span>
+                                <span class="text-[9px] font-extrabold uppercase tracking-widest text-mist-300 mt-1">Happy Clients</span>
+                            </div>
+                        </div>
+
+                        <!-- Stat 3: Total Skills -->
+                        <div class="flex items-center gap-4 border-r-0 md:border-r border-white/20 last:border-0 pr-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-mist-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bebas text-3xl md:text-4xl font-bold tracking-wider leading-none">{{ $totalSkills }}</span>
+                                <span class="text-[9px] font-extrabold uppercase tracking-widest text-mist-300 mt-1">Best Skills</span>
+                            </div>
+                        </div>
+
+                        <!-- Stat 4: Years Experience -->
+                        <div class="flex items-center gap-4 border-r-0 md:border-r border-white/20 last:border-0 pr-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                <svg class="w-6 h-6 text-mist-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bebas text-3xl md:text-4xl font-bold tracking-wider leading-none">{{ $totalExp }}+</span>
+                                <span class="text-[9px] font-extrabold uppercase tracking-widest text-mist-300 mt-1">Years Experiences</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </section>
+
+            <!-- CLIENTS LOGO SECTION (Menggantikan Testimonials) -->
+            <section id="testimonials" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
+                <div class="flex items-center justify-between mb-10">
+                    <div class="space-y-3">
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">CLIENTS</span>
+                        <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Trusted By</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center">
+                    @if(isset($clients) && $clients->isNotEmpty())
+                        @foreach($clients as $client)
+                            <div class="flex items-center justify-center p-4 transition-all duration-300 hover:scale-105">
+                                @if(isset($client->logo_path) && $client->logo_path)
+                                    <img src="{{ asset('storage/' . $client->logo_path) }}" class="max-h-16 w-auto object-contain" alt="{{ $client->name ?? 'Client Logo' }}">
+                                @elseif(isset($client->name))
+                                    <span class="font-bebas text-2xl text-ink-700 tracking-wider">{{ $client->name }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center col-span-full">
+                            <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            <!-- CONTACT & LET'S WORK TOGETHER SECTION -->
+            <section id="contact" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                    
+                    <!-- Left Grid Card Promo -->
+                    <div class="lg:col-span-4 bg-gradient-to-tr from-cobalt to-futura text-mist-50 p-8 rounded-3xl flex flex-col justify-between premium-shadow relative overflow-hidden">
+                        <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-white/5 blur-2xl"></div>
+                        <div class="space-y-4">
+                            <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-mist-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                            </div>
+                            <h4 class="font-bebas text-4xl font-bold tracking-wider">Let's Build the Future!</h4>
+                            <p class="text-xs text-mist-100 leading-relaxed">{{ $user->cta_description ?? 'Mempunyai rencana inovasi atau proyek berkecepatan tinggi? Mari salurkan logika kritis kita bersama untuk membangun platform digital terbaik.' }}</p>
+                        </div>
+                        <span class="text-[10px] font-extrabold tracking-widest uppercase text-white/50 mt-12 block">SAKA | ALENKOSA  &copy; 2026</span>
+                    </div>
+
+                    <!-- Middle Grid Interactive Mail Form -->
+                    <div class="lg:col-span-5 bg-mist-50 border border-mist-300 p-8 rounded-3xl premium-shadow">
+                        <form id="contactForm" method="POST" action="{{ route('messages.public.store', $user->profile_token ?? 'default') }}" onsubmit="submitContactForm(event)" class="space-y-5 text-xs font-bold uppercase tracking-wider text-ink-700">
+                            @csrf
+                            <div class="space-y-1.5">
+                                <label class="text-ink-500 text-[10px]">Your Name</label>
+                                <input type="text" name="name" required placeholder="John Doe" class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case text-ink-900">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-ink-500 text-[10px]">Your Email</label>
+                                <input type="email" name="email" required placeholder="john@example.com" class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case text-ink-900">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-ink-500 text-[10px]">Your Message</label>
+                                <textarea name="message" required rows="4" placeholder="Detail singkat mengenai kerja sama yang ingin Anda capai..." class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case resize-none text-ink-900"></textarea>
+                            </div>
+                            <button type="submit" id="submitBtn" class="w-full py-4 bg-ink-900 hover:bg-cobalt text-mist-100 rounded-xl font-extrabold text-[10px] uppercase tracking-widest transition-colors shadow-lg">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right Grid Contact Details info -->
+                    <div class="lg:col-span-3 flex flex-col justify-center space-y-6 pl-0 lg:pl-6">
+                        <!-- Detail 1 (Email Linked to User Backend Variable) -->
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Email</span>
+                                <a href="mailto:{{ $user->email ?? '#' }}" class="text-xs font-bold text-ink-900 truncate hover:text-cobalt transition-colors">{{ $user->email ?? 'Konten belum tersedia' }}</a>
+                            </div>
+                        </div>
+
+                        <!-- Detail 2 (Phone Linked to User Backend Variable) -->
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Phone</span>
+                                <a href="tel:{{ $user->phone ?? '#' }}" class="text-xs font-bold text-ink-900 truncate hover:text-cobalt transition-colors">{{ $user->phone ?? 'Konten belum tersedia' }}</a>
+                            </div>
+                        </div>
+
+                        <!-- Detail 3 (Location Linked to User Backend Variable) -->
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Location</span>
+                                <span class="text-xs font-bold text-ink-900">{{ $user->location ?? 'Konten belum tersedia' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FLOATING FOOTER -->
+            <footer class="relative z-10 w-full text-center pb-12 pt-6 border-t border-mist-300">
+                <div class="inline-flex flex-col items-center gap-1.5">
+                    <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-[0.25em]">SAKA | ALENKOSA. ALL RIGHTS RESERVED &copy; 2026.</span>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- VIEW ALL PROJECTS POP-UP MODAL CONTAINER -->
+    <div id="allProjectsModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-ink-900/60 backdrop-blur-md opacity-0 smooth-transition">
+        <div class="bg-mist-100 w-full max-w-4xl max-h-[85vh] rounded-[32px] border border-mist-300 premium-shadow flex flex-col overflow-hidden transform scale-95 smooth-transition">
+            <!-- Modal Header -->
+            <div class="px-8 py-5 border-b border-mist-300 bg-mist-50 flex items-center justify-between shrink-0">
+                <div class="space-y-1">
+                    <span class="text-[10px] font-extrabold tracking-widest text-futura uppercase">Full Portfolio</span>
+                    <h3 class="font-bebas text-3xl text-ink-900 tracking-wider">All Archetype Projects</h3>
+                </div>
+                <button onclick="closeAllProjectsModal()" class="w-10 h-10 rounded-full border border-mist-300 bg-mist-50 flex items-center justify-center text-ink-700 hover:text-ink-900 hover:border-cobalt transition-colors font-bold text-sm">✕</button>
+            </div>
+            
+            <!-- Modal Content (Scrollable Grid) -->
+            <div class="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 analytic-grid">
+                @if($hasPortfolios)
+                    @foreach($portfolios as $portfolio)
+                        <!-- Kartu dibuat clickable dengan pembungkus <a> -->
+                        <a href="{{ $portfolio->url ?? '#' }}" target="_blank" rel="noopener noreferrer" class="group flex flex-col space-y-4 bg-mist-50 border border-mist-300 p-4 rounded-2xl premium-shadow hover:-translate-y-1 smooth-transition">
+                            <div class="relative aspect-[16/10] bg-mist-200 rounded-xl overflow-hidden premium-shadow">
+                                @if($portfolio->image_path)
+                                    <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $portfolio->title }}">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-tr from-mist-200 to-mist-300 flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-mist-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    </div>
+                                @endif
+                                <!-- Indikator klik -->
+                                <div class="absolute inset-0 bg-ink-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div class="w-10 h-10 rounded-full bg-mist-50 flex items-center justify-center premium-shadow transform scale-75 group-hover:scale-100 transition-transform">
+                                        <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                         </svg>
                                     </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate transition-colors duration-300">{{ basename($user->resume_path) }}</p>
-                                        <p class="text-xs text-slate-400 dark:text-slate-500 transition-colors duration-300">{{ $resumeSizeLabel }}</p>
-                                    </div>
                                 </div>
-                                <a
-                                    href="{{ asset('storage/' . $user->resume_path) }}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition-all duration-200 active:scale-[0.97] shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30"
-                                >
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                    </svg>
-                                    Buka PDF
-                                </a>
                             </div>
-                            {{-- PDF Preview --}}
-                            <div class="resume-embed border-t border-white/20 dark:border-white/[0.04]">
-                                <iframe
-                                    src="{{ asset('storage/' . $user->resume_path) }}#toolbar=0&navpanes=0&scrollbar=1"
-                                    class="w-full h-[400px] sm:h-[500px] lg:h-[560px] bg-white dark:bg-slate-900"
-                                    loading="lazy"
-                                    title="Preview resume {{ $user->name }}"
-                                ></iframe>
+                            <div class="space-y-1.5 px-2">
+                                <h4 class="text-base font-extrabold text-ink-900 group-hover:text-cobalt transition-colors">{{ $portfolio->title }}</h4>
+                                @if($portfolio->description)
+                                    <p class="text-xs text-ink-700 leading-relaxed">{{ $portfolio->description }}</p>
+                                @endif
                             </div>
-                        </div>
-                    </section>
+                        </a>
+                    @endforeach
+                @else
+                    <!-- Fallback Empty State yang konsisten -->
+                    <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center col-span-full">
+                        <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
+                    </div>
                 @endif
-
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="relative z-10 w-full text-center pb-10 pt-4">
-        <div class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full glass transition-colors duration-500">
-            <span class="text-[10px] font-semibold text-slate-400/60 dark:text-slate-600 uppercase tracking-[0.18em] transition-colors duration-500">Powered by SAKA | ALENKOSA</span>
-        </div>
-    </footer>
+    <!-- Alert / Toast Popup notification with Blue Gradient design -->
+    <div id="toastAlert" class="fixed bottom-6 right-6 z-[100] px-6 py-4 rounded-2xl bg-gradient-to-r from-cobalt to-futura text-mist-50 font-extrabold text-[10px] uppercase tracking-widest shadow-2xl translate-y-28 opacity-0 transition-all duration-500">
+        Pesan Berhasil Terkirim!
+    </div>
 
+    <!-- CLIENT SIDE PREVIEW MOCK INJECTOR & DYNAMIC NAVIGATION SCROLL SCRIPT -->
     <script>
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
+        // Check if the page is loaded statically in browser preview or Laravel backend
+        window.addEventListener('DOMContentLoaded', () => {
+            const isStatic = window.location.href.startsWith('file://') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            
+            if (isStatic) {
+                // If loaded in a dev browser preview environment, inject realistic mock values
+                const elementsToInject = {
+                    'sideName': 'Belum ada nama',
+                    'sideTitle': 'Belum ada jabatan',
+                    'heroName': 'Belum ada nama'
+                };
 
-        // ─── Scroll reveal ───
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    const delay = entry.target.dataset.delay || 0;
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                    }, delay);
-                    observer.unobserve(entry.target);
+                for (const [id, value] of Object.entries(elementsToInject)) {
+                    const el = document.getElementById(id);
+                    if (el && el.innerText.includes('{{')) {
+                        el.innerText = value;
+                    }
                 }
-            });
-        }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-
-        document.querySelectorAll('.reveal, .stagger').forEach((el, i) => {
-            el.dataset.delay = i * 100;
-            observer.observe(el);
+            }
         });
 
-        // ─── Mouse spotlight (desktop only) ───
-        const spotlight = document.getElementById('spotlight');
-        let spotlightActive = false;
-
-        if (window.matchMedia('(pointer: fine)').matches) {
-            document.addEventListener('mousemove', (e) => {
-                if (!spotlightActive) {
-                    spotlight.classList.add('active');
-                    spotlightActive = true;
-                }
-                requestAnimationFrame(() => {
-                    spotlight.style.left = e.clientX + 'px';
-                    spotlight.style.top = e.clientY + 'px';
-                });
-            });
-
-            document.addEventListener('mouseleave', () => {
-                spotlight.classList.remove('active');
-                spotlightActive = false;
-            });
-        }
-
-        // ─── 3D tilt on cards (desktop only) ───
-        if (window.matchMedia('(pointer: fine)').matches) {
-            document.querySelectorAll('.tilt-card').forEach(card => {
-                card.addEventListener('mousemove', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -3;
-                    const rotateY = ((x - centerX) / centerX) * 3;
-                    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(0)`;
-                });
-
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0)';
-                });
-            });
-        }
-
-        // ─── Floating particles ───
-        const particleContainer = document.getElementById('particles');
-        const isMobile = window.innerWidth < 768;
-        const particleCount = isMobile ? 6 : 12;
-
-        function createParticle() {
-            const p = document.createElement('div');
-            p.classList.add('particle');
-            const size = Math.random() * 2.5 + 1;
-            const left = Math.random() * 100;
-            const duration = Math.random() * 15 + 20;
-            const delay = Math.random() * 20;
-            const isDark = document.documentElement.classList.contains('dark');
-
-            p.style.cssText = `
-                width: ${size}px;
-                height: ${size}px;
-                left: ${left}%;
-                bottom: -10px;
-                background: ${isDark ? 'rgba(14,165,233,0.25)' : 'rgba(14,165,233,0.2)'};
-                box-shadow: 0 0 ${size * 3}px ${isDark ? 'rgba(14,165,233,0.1)' : 'rgba(14,165,233,0.08)'};
-                animation-duration: ${duration}s;
-                animation-delay: ${delay}s;
-            `;
-            particleContainer.appendChild(p);
-        }
-
-        for (let i = 0; i < particleCount; i++) createParticle();
-
-        // Re-create particles on theme change to update colors
-        const origToggle = toggleTheme;
-        toggleTheme = function() {
-            origToggle();
+        // Open All Projects Pop-up Modal Function
+        function openAllProjectsModal() {
+            const modal = document.getElementById('allProjectsModal');
+            const inner = modal.querySelector('div');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             setTimeout(() => {
-                particleContainer.innerHTML = '';
-                for (let i = 0; i < particleCount; i++) createParticle();
-            }, 50);
-        };
-    </script>
+                modal.classList.remove('opacity-0');
+                inner.classList.remove('scale-95');
+                inner.classList.add('scale-100');
+            }, 10);
+            document.body.classList.add('overflow-hidden');
+        }
 
+        // Close All Projects Pop-up Modal Function
+        function closeAllProjectsModal() {
+            const modal = document.getElementById('allProjectsModal');
+            const inner = modal.querySelector('div');
+            modal.classList.add('opacity-0');
+            inner.classList.remove('scale-100');
+            inner.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 400);
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        // Toggle Drawer Sidebar menu on mobile screen dimensions
+        function toggleMobileSidebar() {
+            const drawer = document.getElementById('sidebarDrawer');
+            drawer.classList.toggle('-translate-x-full');
+        }
+
+        // Toggle Expandable Inline PDF Preview (without popup/modal)
+        function toggleInlinePdfPreview(pdfUrl) {
+            const container = document.getElementById('inlinePdfContainer');
+            const frame = document.getElementById('pdfFrame');
+            const previewBtnText = document.getElementById('pdfPreviewBtnText');
+
+            if (container.classList.contains('hidden')) {
+                frame.src = pdfUrl;
+                container.classList.remove('hidden');
+                previewBtnText.innerText = 'Hide Preview';
+                
+                // Smooth scroll to container view
+                setTimeout(() => {
+                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            } else {
+                closeInlinePdfPreview();
+            }
+        }
+
+        // Close inline PDF frame helper
+        function closeInlinePdfPreview() {
+            const container = document.getElementById('inlinePdfContainer');
+            const frame = document.getElementById('pdfFrame');
+            const previewBtnText = document.getElementById('pdfPreviewBtnText');
+
+            container.classList.add('hidden');
+            frame.src = '';
+            previewBtnText.innerText = 'Preview CV';
+        }
+
+        // Display Custom Elegant Toast Alert Message box
+        function showContactNotification() {
+            const toast = document.getElementById('toastAlert');
+            toast.classList.remove('translate-y-28', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-28', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // Handle CTA form submit via AJAX
+        async function submitContactForm(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerText;
+            
+            // Set loading state
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'SENDING...';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showContactNotification();
+                    form.reset();
+                } else {
+                    alert(data.message || 'Terjadi kesalahan, silakan coba lagi.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Gagal mengirim pesan. Silakan periksa koneksi Anda.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+            }
+        }
+
+        // Dynamic Shrinking *width* on Scroll for Mobile Top Bar Navbar only.
+        window.addEventListener('scroll', () => {
+            const mobileNavbar = document.getElementById('mobileNavbar');
+            if (!mobileNavbar) return;
+
+            if (window.scrollY > 40) {
+                // Shrink width: Transform from full-width to floating inset card
+                mobileNavbar.classList.remove('top-0', 'left-0', 'right-0', 'w-full', 'rounded-none', 'border-b', 'px-6', 'py-4');
+                mobileNavbar.classList.add('top-4', 'left-4', 'right-4', 'w-[calc(100%-2rem)]', 'rounded-2xl', 'border', 'px-4', 'py-3', 'shadow-xl', 'bg-mist-50/90', 'border-cobalt/20');
+            } else {
+                // Return to flat full-width top bar
+                mobileNavbar.classList.add('top-0', 'left-0', 'right-0', 'w-full', 'rounded-none', 'border-b', 'px-6', 'py-4');
+                mobileNavbar.classList.remove('top-4', 'left-4', 'right-4', 'w-[calc(100%-2rem)]', 'rounded-2xl', 'border', 'px-4', 'py-3', 'shadow-xl', 'bg-mist-50/90', 'border-cobalt/20');
+            }
+        });
+    </script>
 </body>
 </html>

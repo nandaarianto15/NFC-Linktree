@@ -23,6 +23,12 @@
                             <span class="absolute bottom-0 left-3 right-3 h-0.5 bg-sky-500 rounded-full"></span>
                         @endif
                     </a>
+                    <a href="{{ route('messages.index') }}" class="relative h-full flex items-center px-3 text-sm font-medium transition-colors duration-200 {{ request()->routeIs('messages.index') ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                        Pesan Masuk
+                        @if(request()->routeIs('messages.index'))
+                            <span class="absolute bottom-0 left-3 right-3 h-0.5 bg-sky-500 rounded-full"></span>
+                        @endif
+                    </a>
                 </div>
             </div>
 
@@ -121,6 +127,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
                 Profile
+            </a>
+            <a href="{{ route('messages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('messages.index') ? 'bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5' }} transition-colors duration-200">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0l-7.5-4.615a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                Pesan Masuk
             </a>
         </div>
 

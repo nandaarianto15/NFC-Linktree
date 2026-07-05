@@ -111,6 +111,24 @@
             </div>
         </div>
 
+        {{-- Headline & Pengalaman --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="headline">Headline (Di atas Deskripsi)</label>
+                <input id="headline" name="headline" type="text" value="{{ old('headline', $user->headline) }}" placeholder="contoh: Hello, I'm SAKA"
+                    class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600">
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Muncul di atas deskripsi singkat pada halaman publik.</p>
+                @error('headline')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="experience_years">Tahun Pengalaman</label>
+                <input id="experience_years" name="experience_years" type="number" min="0" value="{{ old('experience_years', $user->experience_years ?? 5) }}" placeholder="contoh: 5"
+                    class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600">
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Jumlah tahun pengalaman yang muncul di floating badge.</p>
+                @error('experience_years')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+            </div>
+        </div>
+
         {{-- Bio --}}
         <div>
             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="bio">Tentang Saya</label>
@@ -121,6 +139,15 @@
                 <span id="bio-count" class="text-xs text-slate-300 dark:text-slate-600 font-mono tabular-nums transition-colors duration-500">{{ strlen(old('bio', $user->bio ?? '')) }}/500</span>
             </div>
             @error('bio')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+        </div>
+
+        {{-- Deskripsi CTA --}}
+        <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="cta_description">Deskripsi Panggilan Aksi (CTA)</label>
+            <textarea id="cta_description" name="cta_description" rows="3" placeholder="Mempunyai rencana inovasi atau proyek berkecepatan tinggi?..."
+                class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600 resize-none leading-relaxed">{{ old('cta_description', $user->cta_description) }}</textarea>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Muncul di atas form kontak/kirim pesan pada halaman publik.</p>
+            @error('cta_description')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
         </div>
 
         {{-- Telepon --}}

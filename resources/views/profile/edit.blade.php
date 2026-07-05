@@ -29,9 +29,11 @@
             @endif
 
             @include('profile.partials.update-profile-information-form')
+            @include('profile.partials.manage-services-form')
             @include('profile.partials.manage-skills-form')
             @include('profile.partials.manage-experiences-form')
             @include('profile.partials.manage-portfolios-form')
+            @include('profile.partials.manage-clients-form')
             @include('profile.partials.manage-resume-form')
             {{-- @include('profile.partials.manage-testimonials-form') --}}
 

@@ -46,13 +46,16 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
-            'title'    => ['nullable', 'string', 'max:100'],
-            'bio'      => ['nullable', 'string', 'max:500'],
-            'phone'    => ['nullable', 'string', 'max:20'],
-            'location' => ['nullable', 'string', 'max:100'],
-            'photo'    => ['nullable', 'image', 'max:2048'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
+            'title'            => ['nullable', 'string', 'max:100'],
+            'bio'              => ['nullable', 'string', 'max:500'],
+            'phone'            => ['nullable', 'string', 'max:20'],
+            'location'         => ['nullable', 'string', 'max:100'],
+            'photo'            => ['nullable', 'image', 'max:2048'],
+            'experience_years' => ['nullable', 'integer', 'min:0'],
+            'headline'         => ['nullable', 'string', 'max:255'],
+            'cta_description'  => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

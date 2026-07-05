@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MessageController;
 use App\Models\Link;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -38,11 +39,21 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/testimonials', [ProfileController::class, 'storeTestimonial'])->name('testimonials.store');
     Route::delete('/profile/testimonials/{testimonial}', [ProfileController::class, 'destroyTestimonial'])->name('testimonials.destroy');
 
+    Route::post('/profile/services', [ProfileController::class, 'storeService'])->name('services.store');
+    Route::delete('/profile/services/{service}', [ProfileController::class, 'destroyService'])->name('services.destroy');
+
+    Route::post('/profile/clients', [ProfileController::class, 'storeClient'])->name('clients.store');
+    Route::delete('/profile/clients/{client}', [ProfileController::class, 'destroyClient'])->name('clients.destroy');
+
     Route::put('/profile/resume', [ProfileController::class, 'updateResume'])->name('resume.update');
     Route::delete('/profile/resume', [ProfileController::class, 'destroyResume'])->name('resume.destroy');
+
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
 });
 
 Route::get('/p/{token}', [ProfileController::class, 'showPublicProfile'])->name('public.profile');
+Route::post('/p/{token}/message', [MessageController::class, 'storePublicMessage'])->name('messages.public.store');
 
 Route::view('/scan', 'scan')->name('qr.scanner');
 

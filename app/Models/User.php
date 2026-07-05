@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 // Perubahan 1: Tambahkan 'profile_token' ke dalam Fillable attribute
-#[Fillable(['name', 'email', 'password', 'profile_token', 'profile_photo_path', 'title', 'bio', 'phone', 'location'])]
+#[Fillable(['name', 'email', 'password', 'profile_token', 'profile_photo_path', 'title', 'bio', 'phone', 'location', 'experience_years', 'headline', 'cta_description'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -65,5 +65,20 @@ class User extends Authenticatable
     public function links()
     {
         return $this->hasMany(Link::class);
+    }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class)->orderBy('sort_order');
+    }
+
+    public function clients()
+    {
+        return $this->hasMany(Client::class)->orderBy('sort_order');
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->latest();
     }
 }
