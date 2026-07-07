@@ -248,7 +248,7 @@
     <div class="relative min-h-screen flex">
 
         <!-- SCROLLABLE MAIN CONTENT AREA -->
-        <main class="flex-1 min-w-0 flex flex-col justify-between overflow-x-hidden pt-28">
+        <main class="flex-1 min-w-0 flex flex-col justify-between overflow-x-hidden pt-20 lg:pt-28">
 
             <!-- DESKTOP NAVBAR (Only visible on Desktop, keeps constant premium size/padding) -->
             <header id="desktopNavbar" class="hidden lg:flex fixed top-4 inset-x-4 max-w-7xl mx-auto z-40 items-center justify-between border border-mist-300 bg-mist-50/70 backdrop-blur-md px-6 py-4 rounded-2xl premium-shadow">
@@ -296,7 +296,7 @@
             </header>
 
             <!-- HERO SECTION -->
-            <section id="hero" class="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20 w-full">
+            <section id="hero" class="max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-12 md:pt-20 md:pb-20 w-full">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     
                     <!-- Hero Texts (Left Side) -->
