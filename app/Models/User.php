@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-// use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,19 +9,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-// Perubahan 1: Tambahkan 'profile_token' ke dalam Fillable attribute
 #[Fillable(['name', 'email', 'password', 'profile_token', 'profile_photo_path', 'title', 'bio', 'phone', 'location', 'experience_years', 'headline', 'cta_description'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -34,11 +25,12 @@ class User extends Authenticatable
 
     protected static function boot()
     {
-        // Perubahan 2: WAJIB panggil parent::boot() agar internal Laravel berjalan normal
         parent::boot();
 
         static::creating(function ($user) {
-            $user->profile_token = Str::random(10); // Membuat token acak 10 karakter
+            if (empty($user->profile_token)) {
+                $user->profile_token = Str::random(10);
+            }
         });
     }
 

@@ -19,6 +19,7 @@
             @endif
 
             {{-- QR Code Section --}}
+            @if(auth()->user()->profile_token)
             <div class="relative z-10 p-6 sm:p-8 bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-2xl shadow-xl shadow-sky-500/5 transition-colors duration-500">
                 <div class="flex flex-col sm:flex-row items-center gap-6">
                     <div class="shrink-0 p-4 bg-white dark:bg-slate-800/80 rounded-2xl shadow-lg border border-slate-100 dark:border-white/10 transition-colors duration-500">
@@ -43,6 +44,19 @@
                     </div>
                 </div>
             </div>
+            @else
+            <div class="relative z-10 p-6 sm:p-8 bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-2xl shadow-xl shadow-sky-500/5 transition-colors duration-500">
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center mb-4 transition-colors duration-500">
+                        <svg class="w-7 h-7 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors duration-500">Profil sedang disiapkan...</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 transition-colors duration-500">QR Code akan muncul dalam beberapa saat. Silakan refresh halaman ini.</p>
+                </div>
+            </div>
+            @endif
 
             {{-- Form + List Grid --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -115,9 +129,9 @@
                         <div class="flex flex-col items-center justify-center py-16 text-center">
                             <div class="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 flex items-center justify-center mb-4 transition-colors duration-500">
                                 <svg class="w-[18px] h-[18px] text-sky-500 dark:text-sky-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                                    </svg>
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                </svg>
                             </div>
                             <p class="text-sm font-medium text-slate-500 dark:text-slate-400 transition-colors duration-500">Belum ada link</p>
                             <p class="text-xs text-slate-300 dark:text-slate-600 mt-1 transition-colors duration-500">Gunakan form di sebelah kiri untuk menambah link pertama Anda.</p>
