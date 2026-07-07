@@ -151,8 +151,8 @@
         </div>
 
         {{-- Telepon --}}
-        {{-- <div>
-            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="phone">Nomor Telepon</label>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="phone">Nomor Telepon Perusahaan / Pribadi</label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <svg class="w-4 h-4 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -162,9 +162,9 @@
                 <input id="phone" name="phone" type="tel" value="{{ old('phone', $user->phone) }}" placeholder="contoh: 081234567890"
                     class="w-full py-2.5 pl-10 pr-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600">
             </div>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Opsional. Tidak ditampilkan publik.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1.5 transition-colors duration-500">Ditampilkan pada bagian CTA.</p>
             @error('phone')<p class="text-xs text-red-500 mt-1.5">{{ $message }}</p>@enderror
-        </div> --}}
+        </div>
 
         {{-- Submit --}}
         <div class="pt-2">
