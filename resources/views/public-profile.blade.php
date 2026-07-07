@@ -253,13 +253,12 @@
             <!-- DESKTOP NAVBAR (Only visible on Desktop, keeps constant premium size/padding) -->
             <header id="desktopNavbar" class="hidden lg:flex fixed top-4 inset-x-4 max-w-7xl mx-auto z-40 items-center justify-between border border-mist-300 bg-mist-50/70 backdrop-blur-md px-6 py-4 rounded-2xl premium-shadow">
                 <!-- Left-side Profile Identity matching Sidebar design -->
-                <div class="flex items-center gap-4">
-                    <div class="flex flex-col">
+                <div class="flex items-center gap-4 shrink-0 max-w-[300px]">
+                    <div class="flex flex-col min-w-0">
                         <span class="font-bebas tracking-wider text-ink-900 text-2xl leading-none">{{ $user->name ?? 'Belum ada nama' }}</span>
-                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-futura mt-1 leading-none">{{ $user->title ?? 'Belum ada jabatan' }}</span>
+                        <span class="text-[9px] font-extrabold uppercase tracking-widest text-futura mt-1 leading-tight">{{ $user->title ?? 'Belum ada jabatan' }}</span>
                     </div>
                 </div>
-
                 <!-- Middle Anchor Section Links -->
                 <div class="flex items-center gap-8 text-[10px] font-extrabold uppercase tracking-[0.2em] text-ink-700">
                     <a href="#hero" class="hover:text-cobalt transition-colors">Home</a>
