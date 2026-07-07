@@ -702,8 +702,8 @@
 
                     <!-- Right Grid Contact Details info -->
                     <div class="lg:col-span-3 flex flex-col justify-center space-y-6 pl-0 lg:pl-6">
-                        <!-- Detail 1 (Email Linked to User Backend Variable) -->
-                        <div class="flex items-center gap-4">
+                        <!-- Detail 1 (Email) -->
+                        <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -711,12 +711,12 @@
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Email</span>
-                                <a href="mailto:{{ $user->email ?? '#' }}" class="text-xs font-bold text-ink-900 truncate hover:text-cobalt transition-colors">{{ $user->email ?? 'Konten belum tersedia' }}</a>
+                                <a href="mailto:{{ $user->email ?? '#' }}" class="text-xs font-bold text-ink-900 break-all hover:text-cobalt transition-colors">{{ $user->email ?? 'Konten belum tersedia' }}</a>
                             </div>
                         </div>
 
-                        <!-- Detail 2 (Phone Linked to User Backend Variable) -->
-                        <div class="flex items-center gap-4">
+                        <!-- Detail 2 (Phone) -->
+                        <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -724,12 +724,12 @@
                             </div>
                             <div class="flex flex-col min-w-0">
                                 <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Phone</span>
-                                <a href="tel:{{ $user->phone ?? '#' }}" class="text-xs font-bold text-ink-900 truncate hover:text-cobalt transition-colors">{{ $user->phone ?? 'Konten belum tersedia' }}</a>
+                                <a href="tel:{{ $user->phone ?? '#' }}" class="text-xs font-bold text-ink-900 break-all hover:text-cobalt transition-colors">{{ $user->phone ?? 'Konten belum tersedia' }}</a>
                             </div>
                         </div>
 
-                        <!-- Detail 3 (Location Linked to User Backend Variable) -->
-                        <div class="flex items-center gap-4">
+                        <!-- Detail 3 (Location) -->
+                        <div class="flex items-start gap-4">
                             <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
