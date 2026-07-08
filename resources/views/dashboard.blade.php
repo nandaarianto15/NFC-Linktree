@@ -82,12 +82,14 @@
                             ['key' => 'youtube',    'label' => 'YouTube'],
                             ['key' => 'twitter',    'label' => 'X / Twitter'],
                             ['key' => 'facebook',   'label' => 'Facebook'],
+                            ['key' => 'threads',   'label' => 'Threads'],
                             ['key' => 'linkedin',   'label' => 'LinkedIn'],
                             ['key' => 'github',     'label' => 'GitHub'],
                             ['key' => 'whatsapp',   'label' => 'WhatsApp'],
                             ['key' => 'telegram',   'label' => 'Telegram'],
                             ['key' => 'behance',    'label' => 'Behance'],
                             ['key' => 'dribbble',   'label' => 'Dribbble'],
+                            ['key' => 'drive',      'label' => 'Google Drive'],
                         ];
                         @endphp
 
