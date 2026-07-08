@@ -89,7 +89,6 @@
                             ['key' => 'telegram',   'label' => 'Telegram'],
                             ['key' => 'behance',    'label' => 'Behance'],
                             ['key' => 'dribbble',   'label' => 'Dribbble'],
-                            ['key' => 'drive',      'label' => 'Google Drive'],
                         ];
                         @endphp
 
