@@ -1345,29 +1345,32 @@
             flip.style.transform = 'rotateY(0deg)';
             
             if (bookState.isMobile) {
-                setPageContent(leftContent, bookState.pages[s] || null, true);
-                setPageContent(rightContent, bookState.pages[s+1] || null, false);
                 document.getElementById('flipFrontImg').src = bookState.pages[s] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[s+1] || '';
+                
+                // [NEXT UX]: Langsung render halaman tujuan di bawahnya agar langsung terlihat saat dibuka
+                setPageContent(rightContent, bookState.pages[s+1] || null, false);
             } else {
                 const leftIdx = s * 2 - 1;
                 const nextLeftIdx = (s + 1) * 2 - 1;
                 const nextRightIdx = (s + 1) * 2;
 
-                setPageContent(leftContent, leftIdx >= 0 ? bookState.pages[leftIdx] : null, true);
-                setPageContent(rightContent, bookState.pages[nextRightIdx] || null, false);
-
                 document.getElementById('flipFrontImg').src = bookState.pages[s*2] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[nextLeftIdx] || '';
+
+                // [NEXT UX]: Langsung pasang halaman tujuan berikutnya di balik lipatan overlay
+                setPageContent(leftContent, leftIdx >= 0 ? bookState.pages[leftIdx] : null, true);
+                setPageContent(rightContent, bookState.pages[nextRightIdx] || null, false);
             }
             
-            flip.offsetHeight;
-            flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+            flip.offsetHeight; // Force reflow
+            flip.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
             flip.style.transform = 'rotateY(-180deg)';
 
             flip.addEventListener('transitionend', () => {
                 bookState.currentSpread++;
                 renderSpread();
+                
                 flip.style.transform = '';
                 flip.style.transition = '';
                 flip.style.display = 'none';
@@ -1385,40 +1388,27 @@
             const rightContent = document.getElementById('rightContent');
             const s = bookState.currentSpread;
 
+            flip.style.display = 'block';
+            flip.style.transition = 'none';
+
             if (bookState.isMobile) {
-                // Mobile: Animasi menutup halaman (kebalikan dari flip next)
-                flip.style.display = 'block';
-                flip.style.transition = 'none';
                 flip.style.right = '0';
                 flip.style.left = 'auto';
                 flip.style.transformOrigin = 'left center';
-                
-                // Mulai dari posisi terbuka penuh di kiri (-180 derajat)
                 flip.style.transform = 'rotateY(-180deg)';
 
-                // PERBAIKAN: Jangan ubah isi rightContent ke halaman (s-1) dulu agar tidak mengintip.
-                // Biarkan latar belakang tetap memuat halaman aktif saat ini (s) agar terlihat alami saat ditutup.
-                setPageContent(rightContent, bookState.pages[s] || null, false);
-
-                // Sisi depan overlay adalah halaman tujuan (s-1), sisi belakang adalah halaman saat ini yang akan menutup (s)
+                // Sisi depan (menghadap ke user saat membalik) memuat halaman s-1, belakang memuat halaman aktif s
                 document.getElementById('flipFrontImg').src = bookState.pages[s-1] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[s] || '';
 
-                flip.offsetHeight; // force reflow
+                // [PREV UX]: Kunci latar belakang statis tetap berada di halaman aktif saat ini (s)
+                // Jangan panggil setPageContent ke halaman s-1 disini agar tidak bocor duluan
+                setPageContent(rightContent, bookState.pages[s] || null, false);
 
-                // Animasikan menutup kembali ke kanan (0 derajat)
-                flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+                flip.offsetHeight; // Force reflow
+                flip.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
                 flip.style.transform = 'rotateY(0deg)';
-                
-                // PERBAIKAN: Ubah isi halaman latar belakang setelah animasi penutupan berjalan setengah/hampir selesai
-                setTimeout(() => {
-                    setPageContent(rightContent, bookState.pages[s-1] || null, false);
-                }, 300); // Sinkron dengan pertengahan transisi 0.6s
-                
             } else {
-                // Desktop: spread flip prev (swinging page from left to right)
-                flip.style.display = 'block';
-                flip.style.transition = 'none';
                 flip.style.left = '0';
                 flip.style.right = 'auto';
                 flip.style.transformOrigin = 'right center';
@@ -1428,25 +1418,25 @@
                 const prevLeftIdx = (s - 1) * 2 - 1;
                 const prevRightIdx = (s - 1) * 2;
 
-                setPageContent(leftContent, prevLeftIdx >= 0 ? bookState.pages[prevLeftIdx] : null, true);
-                setPageContent(rightContent, bookState.pages[rightIdx] || null, false);
-
                 document.getElementById('flipFrontImg').src = bookState.pages[s*2-1] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[prevRightIdx] || '';
-                
-                setTimeout(() => {
-                    setPageContent(rightContent, bookState.pages[prevRightIdx] || null, false);
-                }, 300);
 
-                flip.offsetHeight; // force reflow
+                // [PREV UX]: Kunci halaman kiri dan kanan ke spread aktif saat ini (s) 
+                // agar ketika lembaran disingkap dari kiri, halaman lama tidak langsung berganti secara gaib
+                setPageContent(leftContent, bookState.pages[s*2-1] || null, true);
+                setPageContent(rightContent, bookState.pages[rightIdx] || null, false);
 
-                flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+                flip.offsetHeight; // Force reflow
+                flip.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
                 flip.style.transform = 'rotateY(180deg)';
             }
 
+            // [PREV UX]: Halaman sebelumnya baru benar-benar dimunculkan ke dom utama 
+            // HANYA setelah transisi penutupan lembaran kertas selesai sepenuhnya.
             flip.addEventListener('transitionend', () => {
                 bookState.currentSpread--;
-                renderSpread();
+                renderSpread(); // Fungsi ini akan memunculkan halaman s-1 dengan aman secara statis
+                
                 flip.style.transform = '';
                 flip.style.transition = '';
                 flip.style.display = 'none';
