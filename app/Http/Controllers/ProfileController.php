@@ -200,6 +200,19 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit', '#resume')->with('success', 'Resume dihapus.');
     }
 
+    public function updateResumeTitle(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'resume_title' => 'required|string|max:255',
+        ]);
+
+        $user = $request->user();
+        $user->resume_title = $request->resume_title;
+        $user->save();
+
+        return Redirect::route('profile.edit', '#resume')->with('success', 'Label resume berhasil diperbarui.');
+    }
+
     // ── Service ──
 
     public function storeService(Request $request): RedirectResponse

@@ -11,5 +11,6 @@ class Link extends Model
         'user_id',
         'title',
         'url',
+        'icon',
     ];
 }

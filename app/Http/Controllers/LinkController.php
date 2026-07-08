@@ -12,7 +12,8 @@ class LinkController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'url' => 'required|string|max:255', 
+            'url' => 'required|string|max:255',
+            'icon' => 'nullable|string|max:50',
         ]);
 
         $inputUrl = trim($request->url);
@@ -39,6 +40,7 @@ class LinkController extends Controller
             'user_id' => Auth::user()->id,
             'title' => $request->title,
             'url' => $inputUrl,
+            'icon' => $request->icon ?? null,
         ]);
 
         return redirect()->route('dashboard')->with('success', 'Link berhasil ditambahkan!');

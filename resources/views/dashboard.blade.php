@@ -59,10 +59,10 @@
             @endif
 
             {{-- Form + List Grid --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
                 {{-- Add Link Form --}}
-                <div class="relative z-10 p-6 sm:p-8 bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-2xl shadow-xl shadow-sky-500/5 transition-colors duration-500">
+                <div class="relative z-30 p-6 sm:p-8 bg-white/60 dark:bg-slate-900/50 backdrop-blur-2xl border border-white/40 dark:border-white/10 rounded-2xl shadow-xl shadow-sky-500/5 transition-colors duration-500">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-100 dark:border-sky-500/20 flex items-center justify-center transition-colors duration-500">
                             <svg class="w-4 h-4 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -74,21 +74,134 @@
 
                     <form action="{{ route('links.store') }}" method="POST" class="space-y-4">
                         @csrf
+
+                        @php
+                        $socials = [
+                            ['key' => 'instagram',  'label' => 'Instagram'],
+                            ['key' => 'tiktok',     'label' => 'TikTok'],
+                            ['key' => 'youtube',    'label' => 'YouTube'],
+                            ['key' => 'twitter',    'label' => 'X / Twitter'],
+                            ['key' => 'facebook',   'label' => 'Facebook'],
+                            ['key' => 'linkedin',   'label' => 'LinkedIn'],
+                            ['key' => 'github',     'label' => 'GitHub'],
+                            ['key' => 'whatsapp',   'label' => 'WhatsApp'],
+                            ['key' => 'telegram',   'label' => 'Telegram'],
+                            ['key' => 'behance',    'label' => 'Behance'],
+                            ['key' => 'dribbble',   'label' => 'Dribbble'],
+                        ];
+                        @endphp
+
+                        {{-- Platform / Icon Dropdown --}}
+                        <div class="relative" id="iconDropdown">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500">Platform / Icon</label>
+
+                            {{-- Trigger --}}
+                            <button
+                                type="button"
+                                id="iconDropdownTrigger"
+                                onclick="toggleIconDropdown()"
+                                class="w-full flex items-center gap-3 p-3 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 hover:border-slate-300 dark:hover:border-white/20 cursor-pointer text-left"
+                            >
+                                <span id="iconTriggerIcon" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-white/5 shrink-0 transition-colors duration-200">
+                                    <svg class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                                    </svg>
+                                </span>
+                                <span id="iconTriggerLabel" class="flex-1 text-sm text-slate-400 dark:text-slate-500 transition-colors duration-200">Pilih Platform...</span>
+                                <svg id="iconChevron" class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </button>
+
+                            {{-- Dropdown Panel --}}
+                            <div
+                                id="iconDropdownPanel"
+                                class="absolute left-0 right-0 z-50 mt-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 rounded-xl shadow-xl shadow-slate-900/10 dark:shadow-black/30 overflow-hidden opacity-0 scale-[0.97] -translate-y-1 pointer-events-none transition-all duration-150 ease-out flex flex-col max-h-[320px] sm:max-h-[380px]"
+                            >
+                                {{-- Search --}}
+                                <div class="p-2 border-b border-slate-100 dark:border-white/[0.06] shrink-0">
+                                    <div class="relative">
+                                        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
+                                        <input
+                                            type="text"
+                                            id="iconSearch"
+                                            placeholder="Cari platform..."
+                                            oninput="filterIcons(this.value)"
+                                            class="w-full pl-8 pr-3 py-2 text-sm text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-white/5 border border-slate-200/60 dark:border-white/[0.06] rounded-lg outline-none transition-all duration-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                                        >
+                                    </div>
+                                </div>
+
+                                {{-- Scrollable Icon List --}}
+                                <div class="overflow-y-auto p-1.5 custom-scrollbar flex-1" id="iconList">
+                                    @foreach($socials as $social)
+                                        <button
+                                            type="button"
+                                            id="icon-opt-{{ $social['key'] }}"
+                                            data-label="{{ $social['label'] }}"
+                                            onclick="selectIcon('{{ $social['key'] }}', '{{ $social['label'] }}')"
+                                            class="icon-option w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-sky-50 dark:hover:bg-sky-500/10 transition-all duration-150 cursor-pointer text-left mb-0.5"
+                                        >
+                                            <span class="icon-svg w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+                                                @include('components.icons.social', ['icon' => $social['key'], 'size' => 20])
+                                            </span>
+                                            <span class="flex-1 text-sm font-medium text-slate-700 dark:text-slate-200">{{ $social['label'] }}</span>
+                                            <svg class="icon-check hidden w-4 h-4 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </button>
+                                    @endforeach
+
+                                    {{-- No Results --}}
+                                    <div id="iconNoResults" class="hidden py-5 text-center">
+                                        <p class="text-xs text-slate-400 dark:text-slate-500">Platform tidak ditemukan</p>
+                                    </div>
+
+                                    {{-- Separator --}}
+                                    <div class="my-1.5 border-t border-slate-100 dark:border-white/[0.06]"></div>
+
+                                    {{-- Other / Lainnya --}}
+                                    <button
+                                        type="button"
+                                        id="icon-opt-other"
+                                        data-label="Lainnya"
+                                        onclick="selectIcon('other', 'Lainnya')"
+                                        class="icon-option icon-option-other w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-sky-50 dark:hover:bg-sky-500/10 transition-all duration-150 cursor-pointer text-left"
+                                    >
+                                        <span class="icon-svg w-8 h-8 flex items-center justify-center rounded-lg shrink-0">
+                                            @include('components.icons.social', ['icon' => 'other', 'size' => 20])
+                                        </span>
+                                        <span class="flex-1 text-sm font-medium text-slate-500 dark:text-slate-400 italic">Lainnya</span>
+                                        <svg class="icon-check hidden w-4 h-4 text-sky-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="icon" id="selectedIcon" value="">
+                        </div>
+
+                        {{-- Nama Judul --}}
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="title">Nama Judul</label>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="link_title">Nama Judul</label>
                             <input
-                                id="title"
+                                id="link_title"
                                 name="title"
                                 type="text"
                                 class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600"
-                                placeholder="Instagram"
+                                placeholder="Pilih platform di atas atau ketik manual"
                                 required
                             >
                         </div>
+
+                        {{-- URL --}}
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="url">URL / Nomor WA</label>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="link_url">URL / Nomor WA</label>
                             <input
-                                id="url"
+                                id="link_url"
                                 name="url"
                                 type="text"
                                 class="w-full py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600"
@@ -140,11 +253,15 @@
                         <div class="space-y-2.5">
                             @foreach($links as $link)
                                 <div class="group flex items-center gap-3.5 p-3.5 bg-white/50 dark:bg-white/[0.03] rounded-xl border border-slate-200/50 dark:border-white/[0.06] hover:bg-white/70 dark:hover:bg-white/[0.06] hover:border-sky-200/60 dark:hover:border-sky-500/20 transition-all duration-200">
-                                    <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/10 flex items-center justify-center shrink-0 transition-colors duration-200">
-                                        <svg class="w-[18px] h-[18px] text-sky-500 dark:text-sky-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                                        </svg>
+                                    <div class="w-9 h-9 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/[0.07] flex items-center justify-center shrink-0 transition-colors duration-200">
+                                        @if($link->icon)
+                                            @include('components.icons.social', ['icon' => $link->icon, 'size' => 18])
+                                        @else
+                                            <svg class="w-[18px] h-[18px] text-sky-500 dark:text-sky-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                            </svg>
+                                        @endif
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="text-sm font-medium text-slate-800 dark:text-slate-100 transition-colors duration-200">{{ $link->title }}</h4>
@@ -167,4 +284,124 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let dropdownOpen = false;
+
+        function toggleIconDropdown() {
+            dropdownOpen ? closeIconDropdown() : openIconDropdown();
+        }
+
+        function openIconDropdown() {
+            const panel = document.getElementById('iconDropdownPanel');
+            const trigger = document.getElementById('iconDropdownTrigger');
+            const chevron = document.getElementById('iconChevron');
+
+            panel.classList.remove('opacity-0', 'scale-[0.97]', '-translate-y-1', 'pointer-events-none');
+            panel.classList.add('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
+            trigger.classList.add('border-sky-500', 'ring-2', 'ring-sky-500/10');
+            chevron.classList.add('rotate-180');
+
+            document.getElementById('iconSearch').value = '';
+            filterIcons('');
+            dropdownOpen = true;
+
+            setTimeout(() => document.getElementById('iconSearch').focus(), 60);
+        }
+
+        function closeIconDropdown() {
+            const panel = document.getElementById('iconDropdownPanel');
+            const trigger = document.getElementById('iconDropdownTrigger');
+            const chevron = document.getElementById('iconChevron');
+
+            panel.classList.add('opacity-0', 'scale-[0.97]', '-translate-y-1', 'pointer-events-none');
+            panel.classList.remove('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
+            trigger.classList.remove('border-sky-500', 'ring-2', 'ring-sky-500/10');
+            chevron.classList.remove('rotate-180');
+
+            dropdownOpen = false;
+        }
+
+        function filterIcons(query) {
+            const items = document.querySelectorAll('.icon-option:not(.icon-option-other)');
+            const q = query.toLowerCase().trim();
+            let anyVisible = false;
+
+            items.forEach(item => {
+                const label = item.dataset.label.toLowerCase();
+                if (!q || label.includes(q)) {
+                    item.classList.remove('hidden');
+                    anyVisible = true;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            const noResults = document.getElementById('iconNoResults');
+            if (noResults) {
+                noResults.classList.toggle('hidden', anyVisible);
+            }
+        }
+
+        function selectIcon(key, label) {
+            document.getElementById('selectedIcon').value = key;
+
+            // Copy icon SVG into trigger
+            const sourceItem = document.getElementById('icon-opt-' + key);
+            const sourceSvg = sourceItem.querySelector('.icon-svg');
+            const triggerIcon = document.getElementById('iconTriggerIcon');
+            triggerIcon.innerHTML = sourceSvg.innerHTML;
+            triggerIcon.classList.remove('bg-slate-100', 'dark:bg-white/5');
+            triggerIcon.classList.add('bg-transparent');
+
+            // Update trigger label
+            const triggerLabel = document.getElementById('iconTriggerLabel');
+            if (key === 'other') {
+                triggerLabel.textContent = 'Lainnya';
+                triggerLabel.classList.add('italic', 'text-slate-500', 'dark:text-slate-400');
+                triggerLabel.classList.remove('text-slate-400', 'dark:text-slate-500');
+            } else {
+                triggerLabel.textContent = label;
+                triggerLabel.classList.remove('italic', 'text-slate-500', 'dark:text-slate-400');
+                triggerLabel.classList.add('text-slate-800', 'dark:text-slate-100');
+                triggerLabel.classList.remove('text-slate-400', 'dark:text-slate-500');
+            }
+
+            // Highlight selected in list
+            document.querySelectorAll('.icon-option').forEach(item => {
+                item.classList.remove('bg-sky-50', 'dark:bg-sky-500/10', 'ring-1', 'ring-sky-200/60', 'dark:ring-sky-500/20');
+                const check = item.querySelector('.icon-check');
+                if (check) check.classList.add('hidden');
+            });
+            sourceItem.classList.add('bg-sky-50', 'dark:bg-sky-500/10', 'ring-1', 'ring-sky-200/60', 'dark:ring-sky-500/20');
+            const selectedCheck = sourceItem.querySelector('.icon-check');
+            if (selectedCheck) selectedCheck.classList.remove('hidden');
+
+            // Auto-fill title
+            const titleInput = document.getElementById('link_title');
+            if (key === 'other') {
+                titleInput.value = '';
+                titleInput.placeholder = 'Ketik nama link Anda...';
+                setTimeout(() => titleInput.focus(), 100);
+            } else {
+                titleInput.value = label;
+                titleInput.placeholder = 'Pilih platform di atas atau ketik manual';
+            }
+
+            closeIconDropdown();
+        }
+
+        // Close on click outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('iconDropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                closeIconDropdown();
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeIconDropdown();
+        });
+    </script>
 </x-app-layout>

@@ -8,11 +8,34 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
         </div>
-        <div>
-            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 transition-colors duration-500">Resume / CV</h3>
+        <div class="flex-1">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100 transition-colors duration-500">{{ $user->resume_title ?? 'Resume / CV' }}</h3>
             <p class="text-xs text-slate-400 dark:text-slate-500 transition-colors duration-500">Upload 1 file PDF, maksimal 2MB</p>
         </div>
     </div>
+
+    {{-- Customize Label --}}
+    <form action="{{ route('resume.update_title') }}" method="POST" class="mb-6 pb-6 border-b border-slate-200/50 dark:border-white/[0.05] space-y-3">
+        @csrf
+        @method('PUT')
+        <div>
+            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider transition-colors duration-500" for="resume_title">Label / Judul Section</label>
+            <div class="flex gap-3">
+                <input
+                    id="resume_title"
+                    name="resume_title"
+                    type="text"
+                    value="{{ old('resume_title', $user->resume_title ?? 'Resume / CV') }}"
+                    class="flex-1 py-2.5 px-3.5 text-sm text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none transition-all duration-200 focus:border-sky-500 focus:ring-[3px] focus:ring-sky-500/10 placeholder:text-slate-300 dark:placeholder:text-slate-600"
+                    placeholder="Contoh: Resume / CV, Katalog, Sertifikat"
+                    required
+                >
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.985] shrink-0">
+                    Simpan Judul
+                </button>
+            </div>
+        </div>
+    </form>
 
     {{-- Upload Form --}}
     <div
@@ -75,7 +98,7 @@
                             <svg class="w-3.5 h-3.5 text-red-500 dark:text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                             </svg>
-                            <span class="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">Hapus resume?</span>
+                            <span class="text-xs font-medium text-red-600 dark:text-red-400 whitespace-nowrap">Hapus {{ strtolower($user->resume_title ?? 'resume') }}?</span>
                         </div>
                         <button
                             type="button"
@@ -284,7 +307,7 @@
                     :disabled="!fileName"
                     :class="fileName ? '' : 'opacity-40 cursor-not-allowed hover:bg-sky-500'"
                 >
-                    Upload Resume
+                    Upload {{ $user->resume_title ?? 'Resume' }}
                 </button>
             </form>
         @endif
@@ -293,7 +316,7 @@
     {{-- Empty state (hidden when resume exists, shown as info below) --}}
     @if(!$user->resume_path)
         <div class="text-center py-2">
-            <p class="text-xs text-slate-400 dark:text-slate-500 transition-colors duration-500">Resume akan ditampilkan di halaman publik profil kamu.</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 transition-colors duration-500">{{ $user->resume_title ?? 'Resume' }} akan ditampilkan di halaman publik profil kamu.</p>
         </div>
     @endif
 </div>

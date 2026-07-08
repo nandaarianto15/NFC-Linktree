@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/clients/{client}', [ProfileController::class, 'destroyClient'])->name('clients.destroy');
 
     Route::put('/profile/resume', [ProfileController::class, 'updateResume'])->name('resume.update');
+    Route::put('/profile/resume-title', [ProfileController::class, 'updateResumeTitle'])->name('resume.update_title');
     Route::delete('/profile/resume', [ProfileController::class, 'destroyResume'])->name('resume.destroy');
 
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');

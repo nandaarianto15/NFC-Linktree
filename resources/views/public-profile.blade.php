@@ -24,25 +24,25 @@
                     },
                     colors: {
                         mist: {
-                            50: '#fcfdfe',    // Warm Pristine White
-                            100: '#f4f6fa',   // Mist Alabaster Main Background
-                            200: '#eaedf4',   // Sidebar Background
-                            300: '#d5dae6',   // Border lines
+                            50: '#fcfdfe',
+                            100: '#f4f6fa',
+                            200: '#eaedf4',
+                            300: '#d5dae6',
                             400: '#a3b0cc',
                         },
                         ink: {
-                            900: '#0f172a',   // Deep Slate/Navy Black for text
-                            800: '#1e293b',   // Subtitle text
-                            700: '#475569',   // Body text
-                            500: '#64748b',   // Muted text
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#475569',
+                            500: '#64748b',
                         },
                         cobalt: {
-                            DEFAULT: '#1d4ed8', // Darker Cobalt Blue
+                            DEFAULT: '#1d4ed8',
                             dark: '#1e3a8a',
                             light: '#eff6ff',
                         },
                         futura: {
-                            DEFAULT: '#0284c7', // Sky Blue/Cyan Blue (Replacing the former emerald teal)
+                            DEFAULT: '#0284c7',
                             dark: '#0369a1',
                             light: '#f0f9ff',
                         }
@@ -118,6 +118,17 @@
         }
         .skill-bar-low {
             background-color: #94a3b8;
+        }
+
+        /* Linktree accent bar shimmer */
+        .linktree-accent {
+            background: linear-gradient(180deg, #1d4ed8 0%, #0284c7 50%, #1d4ed8 100%);
+            background-size: 100% 200%;
+            animation: linktreeShimmer 4s ease-in-out infinite;
+        }
+        @keyframes linktreeShimmer {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 0% 100%; }
         }
     </style>
 </head>
@@ -330,18 +341,18 @@
                                             <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                             </svg>
-                                            <span>Download CV</span>
+                                            <span>Download {{ $user->resume_title ?? 'CV' }}</span>
                                         </a>
                                         <button onclick="toggleInlinePdfPreview('{{ asset('storage/' . $user->resume_path) }}')" class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-400 hover:border-futura text-ink-800 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all bg-mist-50">
                                             <svg class="w-4 h-4 text-futura" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            <span id="pdfPreviewBtnText">Preview CV</span>
+                                            <span id="pdfPreviewBtnText">Preview {{ $user->resume_title ?? 'CV' }}</span>
                                         </button>
                                     @else
                                         <div class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-300 text-ink-500 font-bold text-[10px] uppercase tracking-widest rounded-xl bg-mist-200 italic cursor-not-allowed">
-                                            File CV Belum Tersedia
+                                            File {{ $user->resume_title ?? 'CV' }} Belum Tersedia
                                         </div>
                                     @endif
                                 </div>
@@ -350,7 +361,7 @@
                             <!-- PDF Inline Expandable Preview Frame (Hidden by Default) -->
                             <div id="inlinePdfContainer" class="hidden w-full mt-4 bg-white border border-mist-300 rounded-2xl overflow-hidden premium-shadow transition-all duration-500">
                                 <div class="bg-mist-200 px-4 py-3 flex justify-between items-center border-b border-mist-300">
-                                    <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">CV Document Preview</span>
+                                    <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">{{ $user->resume_title ?? 'CV' }} Preview</span>
                                     <button onclick="closeInlinePdfPreview()" class="text-xs text-ink-500 hover:text-ink-900 font-bold">✕ Close</button>
                                 </div>
                                 <div class="w-full aspect-[4/5] sm:h-[600px] bg-slate-100">
@@ -359,25 +370,39 @@
                             </div>
                         </div>
 
-                        <!-- Linktree Row -->
-                        <div class="pt-10 border-t border-mist-300 space-y-4">
+                        <!-- Linktree Highlight Section -->
+                        <div class="pt-10 space-y-4">
                             <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">My Linktree / Network</span>
-                            <div class="flex flex-wrap items-center gap-6 md:gap-10">
+                            <div class="relative max-w-xl bg-mist-50 border border-cobalt/15 rounded-2xl p-4 space-y-0.5 premium-shadow overflow-hidden">
+                                <!-- Left Accent Bar -->
+                                <div class="absolute top-0 left-0 w-1 h-full linktree-accent rounded-l-2xl"></div>
                                 @if(isset($links) && $links->isNotEmpty())
                                     @foreach($links as $link)
-                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="font-bebas text-lg md:text-xl text-ink-800 hover:text-cobalt tracking-wider uppercase transition-colors duration-300">
-                                            {{ $link->title }}
+                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-cobalt/5 transition-all duration-300">
+                                            <div class="flex items-center gap-3.5">
+                                                @if($link->icon)
+                                                    <span class="w-6 h-6 flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                        @include('components.icons.social', ['icon' => $link->icon, 'size' => 22])
+                                                    </span>
+                                                @else
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-cobalt/30 group-hover:bg-cobalt transition-colors duration-300 shrink-0"></span>
+                                                @endif
+                                                <span class="font-bebas text-lg md:text-xl text-ink-800 group-hover:text-cobalt tracking-wider uppercase transition-colors duration-300">{{ $link->title }}</span>
+                                            </div>
+                                            <svg class="w-4 h-4 text-cobalt/0 group-hover:text-cobalt transition-all duration-300 -translate-x-2 group-hover:translate-x-0 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                            </svg>
                                         </a>
                                     @endforeach
                                 @else
-                                    <span class="text-sm text-ink-500 italic">Tautan belum tersedia saat ini.</span>
+                                    <span class="text-sm text-ink-500 italic px-4 py-3 block">Tautan belum tersedia saat ini.</span>
                                 @endif
                             </div>
                         </div>
                     </div>
 
-                    <!-- Profile Banner & Floating Stats (Right Side) -->
-                    <div class="lg:col-span-5 flex justify-center relative">
+                    <!-- Profile Banner & Floating Stats (Right Side) — ORDER FIRST ON MOBILE -->
+                    <div class="lg:col-span-5 flex justify-center relative order-first lg:order-none">
                         <!-- Graphic Halo Background Ring in Blue representing orbit/forecasting -->
                         <div class="absolute inset-0 bg-gradient-to-tr from-cobalt/10 to-futura/5 rounded-full filter blur-3xl scale-90 -z-10"></div>
                         <div class="absolute w-[320px] h-[320px] rounded-full border-2 border-dashed border-cobalt/20 animate-[spin_40s_linear_infinite] top-[10%]"></div>
@@ -683,292 +708,242 @@
                         <form id="contactForm" method="POST" action="{{ route('messages.public.store', $user->profile_token ?? 'default') }}" onsubmit="submitContactForm(event)" class="space-y-5 text-xs font-bold uppercase tracking-wider text-ink-700">
                             @csrf
                             <div class="space-y-1.5">
-                                <label class="text-ink-500 text-[10px]">Your Name</label>
-                                <input type="text" name="name" required placeholder="John Doe" class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case text-ink-900">
+                                <label for="senderName" class="block text-ink-500 text-[10px] tracking-widest">Your Name</label>
+                                <input type="text" id="senderName" name="name" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="John Doe">
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-ink-500 text-[10px]">Your Email</label>
-                                <input type="email" name="email" required placeholder="john@example.com" class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case text-ink-900">
+                                <label for="senderEmail" class="block text-ink-500 text-[10px] tracking-widest">Email Address</label>
+                                <input type="email" id="senderEmail" name="email" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="john@example.com">
                             </div>
                             <div class="space-y-1.5">
-                                <label class="text-ink-500 text-[10px]">Your Message</label>
-                                <textarea name="message" required rows="4" placeholder="Detail singkat mengenai kerja sama yang ingin Anda capai..." class="w-full px-4 py-3 border border-mist-300 bg-mist-100 rounded-xl focus:border-cobalt focus:outline-none transition-colors font-medium normal-case resize-none text-ink-900"></textarea>
+                                <label for="senderMessage" class="block text-ink-500 text-[10px] tracking-widest">Message</label>
+                                <textarea id="senderMessage" name="message" rows="4" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors resize-none" placeholder="Tell me about your project..."></textarea>
                             </div>
-                            <button type="submit" id="submitBtn" class="w-full py-4 bg-ink-900 hover:bg-cobalt text-mist-100 rounded-xl font-extrabold text-[10px] uppercase tracking-widest transition-colors shadow-lg">
-                                Send Message
+                            <button type="submit" id="contactSubmitBtn" class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ink-900 hover:bg-cobalt text-mist-100 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg">
+                                <span>Send Message</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
                             </button>
                         </form>
+                        <!-- Success Toast -->
+                        <div id="contactSuccess" class="hidden mt-4 px-4 py-3 bg-cobalt/10 border border-cobalt/30 rounded-xl text-center">
+                            <span class="text-xs font-bold text-cobalt">Pesan berhasil dikirim! Terima kasih.</span>
+                        </div>
                     </div>
 
-                    <!-- Right Grid Contact Details info -->
-                    <div class="lg:col-span-3 flex flex-col justify-center space-y-6 pl-0 lg:pl-6">
-                        <!-- Detail 1 (Email) -->
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Email</span>
-                                <a href="mailto:{{ $user->email ?? '#' }}" class="text-xs font-bold text-ink-900 break-all hover:text-cobalt transition-colors">{{ $user->email ?? 'Konten belum tersedia' }}</a>
-                            </div>
-                        </div>
+                    <!-- Right Grid Contact Info -->
+                    <div class="lg:col-span-3 bg-mist-50 border border-mist-300 p-8 rounded-3xl premium-shadow flex flex-col justify-between">
+                        <div class="space-y-6">
+                            <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Get in Touch</span>
+                            
+                            @if(isset($user->email) && $user->email)
+                                <div class="space-y-2">
+                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Email</span>
+                                    <a href="mailto:{{ $user->email }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium break-all">{{ $user->email }}</a>
+                                </div>
+                            @endif
 
-                        <!-- Detail 2 (Phone) -->
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Phone</span>
-                                <a href="tel:{{ $user->phone ?? '#' }}" class="text-xs font-bold text-ink-900 break-all hover:text-cobalt transition-colors">{{ $user->phone ?? 'Konten belum tersedia' }}</a>
-                            </div>
-                        </div>
+                            @if(isset($user->phone) && $user->phone)
+                                <div class="space-y-2">
+                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Phone</span>
+                                    <a href="tel:{{ $user->phone }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium">{{ $user->phone }}</a>
+                                </div>
+                            @endif
 
-                        <!-- Detail 3 (Location) -->
-                        <div class="flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-futura shrink-0">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
-                            <div class="flex flex-col min-w-0">
-                                <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-widest">Location</span>
-                                <span class="text-xs font-bold text-ink-900">{{ $user->location ?? 'Konten belum tersedia' }}</span>
-                            </div>
+                            @if(isset($user->location) && $user->location)
+                                <div class="space-y-2">
+                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Location</span>
+                                    <span class="text-sm text-ink-800 font-medium">{{ $user->location }}</span>
+                                </div>
+                            @endif
+
+                            @if(isset($links) && $links->isNotEmpty())
+                                <div class="space-y-2 pt-4 border-t border-mist-300">
+                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Social</span>
+                                    <div class="flex flex-wrap gap-3">
+                                        @foreach($links as $link)
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                </svg>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                 </div>
             </section>
 
-            <!-- FLOATING FOOTER -->
-            <footer class="relative z-10 w-full text-center pb-12 pt-6 border-t border-mist-300">
-                <div class="inline-flex flex-col items-center gap-1.5">
-                    <span class="text-[9px] font-extrabold text-ink-500 uppercase tracking-[0.25em]">SAKA | ALENKOSA. ALL RIGHTS RESERVED &copy; 2026.</span>
+            <!-- FOOTER -->
+            <footer class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-8 w-full">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">&copy; {{ date('Y') }} {{ $user->name ?? 'Profil' }}. All rights reserved.</span>
+                    <span class="text-[10px] font-bold text-ink-400">Crafted with precision.</span>
                 </div>
             </footer>
 
         </main>
     </div>
 
-    <!-- VIEW ALL PROJECTS POP-UP MODAL CONTAINER -->
-    <div id="allProjectsModal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-ink-900/60 backdrop-blur-md opacity-0 smooth-transition">
-        <div class="bg-mist-100 w-full max-w-4xl max-h-[85vh] rounded-[32px] border border-mist-300 premium-shadow flex flex-col overflow-hidden transform scale-95 smooth-transition">
-            <!-- Modal Header -->
-            <div class="px-8 py-5 border-b border-mist-300 bg-mist-50 flex items-center justify-between shrink-0">
-                <div class="space-y-1">
-                    <span class="text-[10px] font-extrabold tracking-widest text-futura uppercase">Full Portfolio</span>
-                    <h3 class="font-bebas text-3xl text-ink-900 tracking-wider">All Archetype Projects</h3>
-                </div>
-                <button onclick="closeAllProjectsModal()" class="w-10 h-10 rounded-full border border-mist-300 bg-mist-50 flex items-center justify-center text-ink-700 hover:text-ink-900 hover:border-cobalt transition-colors font-bold text-sm">✕</button>
-            </div>
-            
-            <!-- Modal Content (Scrollable Grid) -->
-            <div class="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 analytic-grid">
-                @if($hasPortfolios)
-                    @foreach($portfolios as $portfolio)
-                        <!-- Kartu dibuat clickable dengan pembungkus <a> -->
-                        <a href="{{ $portfolio->url ?? '#' }}" target="_blank" rel="noopener noreferrer" class="group flex flex-col space-y-4 bg-mist-50 border border-mist-300 p-4 rounded-2xl premium-shadow hover:-translate-y-1 smooth-transition">
-                            <div class="relative aspect-[16/10] bg-mist-200 rounded-xl overflow-hidden premium-shadow">
-                                @if($portfolio->image_path)
-                                    <img src="{{ asset('storage/' . $portfolio->image_path) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $portfolio->title }}">
-                                @else
-                                    <div class="w-full h-full bg-gradient-to-tr from-mist-200 to-mist-300 flex items-center justify-center">
-                                        <svg class="w-10 h-10 text-mist-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    </div>
-                                @endif
-                                <!-- Indikator klik -->
-                                <div class="absolute inset-0 bg-ink-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div class="w-10 h-10 rounded-full bg-mist-50 flex items-center justify-center premium-shadow transform scale-75 group-hover:scale-100 transition-transform">
-                                        <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="space-y-1.5 px-2">
-                                <h4 class="text-base font-extrabold text-ink-900 group-hover:text-cobalt transition-colors">{{ $portfolio->title }}</h4>
-                                @if($portfolio->description)
-                                    <p class="text-xs text-ink-700 leading-relaxed">{{ $portfolio->description }}</p>
-                                @endif
-                            </div>
-                        </a>
-                    @endforeach
-                @else
-                    <!-- Fallback Empty State yang konsisten -->
-                    <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center col-span-full">
-                        <p class="text-sm text-ink-500 italic">Konten pada bagian ini belum tersedia.</p>
+    <!-- ALL PROJECTS MODAL -->
+    <div id="allProjectsModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-ink-900/60 backdrop-blur-sm" onclick="closeAllProjectsModal()"></div>
+        <div class="relative flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-mist-50 border border-mist-300 rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-y-auto premium-shadow">
+                <div class="sticky top-0 bg-mist-50/90 backdrop-blur-md border-b border-mist-300 px-8 py-5 flex items-center justify-between rounded-t-3xl z-10">
+                    <div>
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">ALL PROJECTS</span>
+                        <h3 class="font-bebas text-3xl font-black text-ink-900 tracking-wider">Complete Portfolio</h3>
                     </div>
-                @endif
+                    <button onclick="closeAllProjectsModal()" class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-ink-900 hover:border-cobalt transition-all">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" id="allProjectsGrid">
+                    <!-- Populated dynamically or statically with all portfolios -->
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Alert / Toast Popup notification with Blue Gradient design -->
-    <div id="toastAlert" class="fixed bottom-6 right-6 z-[100] px-6 py-4 rounded-2xl bg-gradient-to-r from-cobalt to-futura text-mist-50 font-extrabold text-[10px] uppercase tracking-widest shadow-2xl translate-y-28 opacity-0 transition-all duration-500">
-        Pesan Berhasil Terkirim!
-    </div>
+    <!-- SIDEBAR OVERLAY BACKDROP -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm hidden lg:hidden" onclick="toggleMobileSidebar()"></div>
 
-    <!-- CLIENT SIDE PREVIEW MOCK INJECTOR & DYNAMIC NAVIGATION SCROLL SCRIPT -->
     <script>
-        // Check if the page is loaded statically in browser preview or Laravel backend
-        window.addEventListener('DOMContentLoaded', () => {
-            const isStatic = window.location.href.startsWith('file://') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            
-            if (isStatic) {
-                // If loaded in a dev browser preview environment, inject realistic mock values
-                const elementsToInject = {
-                    'sideName': 'Belum ada nama',
-                    'sideTitle': 'Belum ada jabatan',
-                    'heroName': 'Belum ada nama'
-                };
-
-                for (const [id, value] of Object.entries(elementsToInject)) {
-                    const el = document.getElementById(id);
-                    if (el && el.innerText.includes('{{')) {
-                        el.innerText = value;
-                    }
-                }
-            }
-        });
-
-        // Open All Projects Pop-up Modal Function
-        function openAllProjectsModal() {
-            const modal = document.getElementById('allProjectsModal');
-            const inner = modal.querySelector('div');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                inner.classList.remove('scale-95');
-                inner.classList.add('scale-100');
-            }, 10);
-            document.body.classList.add('overflow-hidden');
-        }
-
-        // Close All Projects Pop-up Modal Function
-        function closeAllProjectsModal() {
-            const modal = document.getElementById('allProjectsModal');
-            const inner = modal.querySelector('div');
-            modal.classList.add('opacity-0');
-            inner.classList.remove('scale-100');
-            inner.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.remove('flex');
-                modal.classList.add('hidden');
-            }, 400);
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        // Toggle Drawer Sidebar menu on mobile screen dimensions
+        // ==================== MOBILE SIDEBAR TOGGLE ====================
         function toggleMobileSidebar() {
             const drawer = document.getElementById('sidebarDrawer');
-            drawer.classList.toggle('-translate-x-full');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = !drawer.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            } else {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
         }
 
-        // Toggle Expandable Inline PDF Preview (without popup/modal)
-        function toggleInlinePdfPreview(pdfUrl) {
+        // ==================== PDF PREVIEW ====================
+        function toggleInlinePdfPreview(url) {
             const container = document.getElementById('inlinePdfContainer');
             const frame = document.getElementById('pdfFrame');
-            const previewBtnText = document.getElementById('pdfPreviewBtnText');
-
+            const btnText = document.getElementById('pdfPreviewBtnText');
+            
             if (container.classList.contains('hidden')) {
-                frame.src = pdfUrl;
+                frame.src = url;
                 container.classList.remove('hidden');
-                previewBtnText.innerText = 'Hide Preview';
-                
-                // Smooth scroll to container view
-                setTimeout(() => {
-                    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+                btnText.textContent = 'Hide Preview';
             } else {
                 closeInlinePdfPreview();
             }
         }
 
-        // Close inline PDF frame helper
         function closeInlinePdfPreview() {
             const container = document.getElementById('inlinePdfContainer');
             const frame = document.getElementById('pdfFrame');
-            const previewBtnText = document.getElementById('pdfPreviewBtnText');
-
+            const btnText = document.getElementById('pdfPreviewBtnText');
+            
             container.classList.add('hidden');
             frame.src = '';
-            previewBtnText.innerText = 'Preview CV';
+            btnText.textContent = 'Preview CV';
         }
 
-        // Display Custom Elegant Toast Alert Message box
-        function showContactNotification() {
-            const toast = document.getElementById('toastAlert');
-            toast.classList.remove('translate-y-28', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            setTimeout(() => {
-                toast.classList.add('translate-y-28', 'opacity-0');
-                toast.classList.remove('translate-y-0', 'opacity-100');
-            }, 3000);
-        }
-
-        // Handle CTA form submit via AJAX
-        async function submitContactForm(event) {
-            event.preventDefault();
-            const form = event.target;
-            const submitBtn = document.getElementById('submitBtn');
-            const originalBtnText = submitBtn.innerText;
+        // ==================== CONTACT FORM SUBMIT ====================
+        function submitContactForm(e) {
+            e.preventDefault();
+            const form = document.getElementById('contactForm');
+            const btn = document.getElementById('contactSubmitBtn');
+            const success = document.getElementById('contactSuccess');
             
-            // Set loading state
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'SENDING...';
-
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showContactNotification();
-                    form.reset();
-                } else {
-                    alert(data.message || 'Terjadi kesalahan, silakan coba lagi.');
+            btn.innerHTML = '<span>Sending...</span>';
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-            } catch (error) {
-                console.error(error);
-                alert('Gagal mengirim pesan. Silakan periksa koneksi Anda.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = originalBtnText;
-            }
+            })
+            .then(response => {
+                if (response.ok) {
+                    form.reset();
+                    success.classList.remove('hidden');
+                    setTimeout(() => success.classList.add('hidden'), 4000);
+                } else {
+                    alert('Gagal mengirim pesan. Silakan coba lagi.');
+                }
+            })
+            .catch(() => {
+                alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
+            })
+            .finally(() => {
+                btn.innerHTML = '<span>Send Message</span><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>';
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            });
         }
 
-        // Dynamic Shrinking *width* on Scroll for Mobile Top Bar Navbar only.
-        window.addEventListener('scroll', () => {
-            const mobileNavbar = document.getElementById('mobileNavbar');
-            if (!mobileNavbar) return;
+        // ==================== ALL PROJECTS MODAL ====================
+        function openAllProjectsModal() {
+            const modal = document.getElementById('allProjectsModal');
+            const grid = document.getElementById('allProjectsGrid');
+            
+            // Clone existing portfolio items into modal
+            const sourceGrid = document.getElementById('portfolioGrid');
+            if (sourceGrid && grid.innerHTML.trim() === '') {
+                grid.innerHTML = sourceGrid.innerHTML;
+            }
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-            if (window.scrollY > 40) {
-                // Shrink width: Transform from full-width to floating inset card
-                mobileNavbar.classList.remove('top-0', 'left-0', 'right-0', 'w-full', 'rounded-none', 'border-b', 'px-6', 'py-4');
-                mobileNavbar.classList.add('top-4', 'left-4', 'right-4', 'w-[calc(100%-2rem)]', 'rounded-2xl', 'border', 'px-4', 'py-3', 'shadow-xl', 'bg-mist-50/90', 'border-cobalt/20');
-            } else {
-                // Return to flat full-width top bar
-                mobileNavbar.classList.add('top-0', 'left-0', 'right-0', 'w-full', 'rounded-none', 'border-b', 'px-6', 'py-4');
-                mobileNavbar.classList.remove('top-4', 'left-4', 'right-4', 'w-[calc(100%-2rem)]', 'rounded-2xl', 'border', 'px-4', 'py-3', 'shadow-xl', 'bg-mist-50/90', 'border-cobalt/20');
+        function closeAllProjectsModal() {
+            document.getElementById('allProjectsModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAllProjectsModal();
+                const drawer = document.getElementById('sidebarDrawer');
+                if (!drawer.classList.contains('-translate-x-full')) {
+                    toggleMobileSidebar();
+                }
             }
         });
+
+        // ==================== MOBILE NAVBAR SCROLL BEHAVIOR ====================
+        let lastScrollY = 0;
+        const mobileNavbar = document.getElementById('mobileNavbar');
+        
+        window.addEventListener('scroll', function() {
+            const currentScrollY = window.scrollY;
+            
+            if (currentScrollY > 100) {
+                mobileNavbar.classList.add('shadow-md');
+                mobileNavbar.style.backgroundColor = 'rgba(244, 246, 250, 0.95)';
+            } else {
+                mobileNavbar.classList.remove('shadow-md');
+                mobileNavbar.style.backgroundColor = '';
+            }
+            
+            lastScrollY = currentScrollY;
+        }, { passive: true });
     </script>
+
 </body>
 </html>
