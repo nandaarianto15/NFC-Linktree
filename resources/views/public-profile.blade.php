@@ -13,6 +13,8 @@
     
     <!-- Tailwind CSS CDN with Blue Theme Config -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js for book rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -129,6 +131,238 @@
         @keyframes linktreeShimmer {
             0%, 100% { background-position: 0% 0%; }
             50% { background-position: 0% 100%; }
+        }
+
+        /* ========== BOOK PREVIEW STYLES ========== */
+        .book-container {
+            perspective: 1800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            min-height: 380px;
+        }
+        @media (min-width: 640px) {
+            .book-container {
+                padding: 20px;
+                min-height: 500px;
+            }
+        }
+
+        .book-spread {
+            display: flex;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(2deg);
+            transition: transform 0.5s ease;
+        }
+
+        .book-page {
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .book-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Left page - shadow on right edge (spine side) */
+        .book-page-left::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 25px; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.08));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Right page - shadow on left edge (spine side) */
+        .book-page-right::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 25px; height: 100%;
+            background: linear-gradient(to left, transparent, rgba(0,0,0,0.08));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Page stack effect on right side */
+        .book-page-right::after {
+            content: '';
+            position: absolute;
+            top: 2px; right: -3px;
+            width: 3px; height: calc(100% - 4px);
+            background: repeating-linear-gradient(
+                to bottom,
+                #e2e8f0 0px, #e2e8f0 1px,
+                #f1f5f9 1px, #f1f5f9 2px
+            );
+            border-radius: 0 1px 1px 0;
+            box-shadow: 1px 0 2px rgba(0,0,0,0.06);
+        }
+
+        /* Book spine */
+        .book-spine {
+            width: 4px;
+            background: linear-gradient(to right, #c7ccd6, #a8b0be 40%, #9ca3af 50%, #a8b0be 60%, #c7ccd6);
+            box-shadow: -3px 0 8px rgba(0,0,0,0.06), 3px 0 8px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+            z-index: 5;
+        }
+
+        /* Flip page overlay */
+        .flip-overlay {
+            position: absolute;
+            top: 0;
+            transform-style: preserve-3d;
+            z-index: 20;
+            pointer-events: none;
+            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .flip-overlay.no-anim { transition: none !important; }
+
+        /* Forward flip - on right side, rotates around left edge */
+        .flip-overlay.flip-fwd {
+            right: 0;
+            transform-origin: left center;
+        }
+
+        /* Backward flip - on left side, rotates around right edge */
+        .flip-overlay.flip-bwd {
+            left: 0;
+            transform-origin: right center;
+        }
+
+        .flip-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .flip-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+        }
+
+        .flip-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Flip shadows */
+        .flip-overlay.flip-fwd .flip-front {
+            box-shadow: -6px 0 15px rgba(0,0,0,0.1);
+        }
+        .flip-overlay.flip-bwd .flip-front {
+            box-shadow: 6px 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* Navigation arrows */
+        .book-nav {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(29, 78, 216, 0.25);
+            color: #1d4ed8;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .book-nav:hover:not(:disabled) {
+            background: rgba(29, 78, 216, 0.15);
+            transform: scale(1.1);
+        }
+        .book-nav:disabled {
+            opacity: 0.3; cursor: not-allowed;
+        }
+
+        /* Page dots */
+        .page-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #d5dae6;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        .page-dot.active {
+            background: #1d4ed8;
+            width: 18px;
+            border-radius: 3px;
+        }
+        .page-dot:hover:not(.active) {
+            background: #a3b0cc;
+        }
+
+        /* Loading spinner */
+        .book-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid #eaedf4;
+            border-top-color: #1d4ed8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Progress bar */
+        .book-progress {
+            width: 160px; height: 3px;
+            background: #eaedf4;
+            border-radius: 99px; overflow: hidden;
+        }
+        .book-progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #1d4ed8, #0284c7);
+            border-radius: 99px;
+            transition: width 0.3s ease;
+        }
+
+        /* Mobile: single page mode */
+        @media (max-width: 767px) {
+            .book-page-left, .book-spine { display: none !important; }
+            .flip-overlay.flip-bwd {
+                right: 0; left: auto;
+                transform-origin: left center;
+            }
+        }
+
+        /* Entrance animation */
+        @keyframes bookIn {
+            from { opacity: 0; transform: rotateX(2deg) scale(0.95); }
+            to { opacity: 1; transform: rotateX(2deg) scale(1); }
+        }
+        .book-entering .book-spread {
+            animation: bookIn 0.4s ease forwards;
+        }
+
+        /* Blank page */
+        .blank-page {
+            background: #f8fafc;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .blank-page::after {
+            content: '';
+            width: 60px; height: 80px;
+            border: 2px dashed #d5dae6;
+            border-radius: 8px;
+            opacity: 0.5;
         }
     </style>
 </head>
@@ -305,11 +539,9 @@
                 </button>
             </header>
 
-            <!-- HERO SECTION -->
             <section id="hero" class="max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-12 md:pt-20 md:pb-20 w-full">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center lg:items-start">
                     
-                    <!-- Hero Texts (Left Side) -->
                     <div class="lg:col-span-7 space-y-6">
                         <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">HELLO, I'M</span>
                         <h2 id="heroName" class="font-bebas text-6xl md:text-8xl text-ink-900 tracking-wider leading-[0.9]">
@@ -324,7 +556,6 @@
                             {{ $user->bio ?? 'Konten pada bagian ini belum tersedia.' }}
                         </p>
 
-                        <!-- Action Buttons and PDF Dynamic Inline Preview -->
                         <div class="flex flex-col gap-4 pt-4">
                             <div class="flex flex-wrap gap-4">
                                 <a href="#portfolio" class="inline-flex items-center gap-2.5 px-6 py-3.5 bg-ink-900 hover:bg-cobalt text-mist-100 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg">
@@ -334,7 +565,6 @@
                                     </svg>
                                 </a>
 
-                                <!-- CV Download & Preview toggle button -->
                                 <div class="flex gap-2">
                                     @if(isset($user->resume_path) && $user->resume_path)
                                         <a href="{{ asset('storage/' . $user->resume_path) }}" download class="inline-flex items-center gap-2 px-4 py-3.5 border border-mist-400 hover:border-cobalt text-ink-800 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all bg-mist-50">
@@ -358,40 +588,82 @@
                                 </div>
                             </div>
 
-                            <!-- PDF Inline Expandable Preview Frame (Hidden by Default) -->
                             <div id="inlinePdfContainer" class="hidden w-full mt-4 bg-white border border-mist-300 rounded-2xl overflow-hidden premium-shadow transition-all duration-500">
                                 <div class="bg-mist-200 px-4 py-3 flex justify-between items-center border-b border-mist-300">
-                                    <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">{{ $user->resume_title ?? 'CV' }} Preview</span>
-                                    <button onclick="closeInlinePdfPreview()" class="text-xs text-ink-500 hover:text-ink-900 font-bold">✕ Close</button>
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-4 h-4 text-cobalt" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                        <span class="text-[10px] font-extrabold tracking-widest text-ink-500 uppercase">{{ $user->resume_title ?? 'CV' }} Preview</span>
+                                    </div>
+                                    <button onclick="closeInlinePdfPreview()" class="text-xs text-ink-500 hover:text-ink-900 font-bold transition-colors">✕ Close</button>
                                 </div>
-                                <div class="w-full aspect-[4/5] sm:h-[600px] bg-slate-100">
-                                    <iframe id="pdfFrame" class="w-full h-full border-0" src=""></iframe>
+                                <div class="bg-gradient-to-b from-slate-50 to-slate-100">
+                                    <div id="bookLoading" class="hidden flex flex-col items-center justify-center py-16 gap-4">
+                                        <div class="book-spinner"></div>
+                                        <div class="text-center space-y-2">
+                                            <p id="bookLoadText" class="text-xs font-semibold text-ink-500">Memuat halaman...</p>
+                                            <div class="book-progress mx-auto">
+                                                <div id="bookProgressFill" class="book-progress-fill"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="bookError" class="hidden flex flex-col items-center justify-center py-16 gap-3">
+                                        <svg class="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <p class="text-xs text-ink-500">Gagal memuat preview</p>
+                                        <button onclick="fallbackPdf()" class="text-[10px] font-bold text-cobalt hover:underline">Buka PDF di tab baru</button>
+                                    </div>
+                                    <div id="bookView" class="hidden">
+                                        <div class="relative flex items-center justify-center py-4 px-1 sm:px-4">
+                                            <button id="bookPrev" onclick="bookFlipPrev()" class="book-nav absolute left-2 md:relative md:left-auto z-30" disabled aria-label="Halaman sebelumnya">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                            </button>
+                                            <div class="book-container flex-1 max-w-full" id="bookContainer">
+                                                <div class="book-spread" id="bookSpread">
+                                                    <div class="book-page book-page-left" id="pageLeft">
+                                                        <div class="blank-page w-full h-full" id="leftContent"></div>
+                                                    </div>
+                                                    <div class="book-spine" id="bookSpine"></div>
+                                                    <div class="book-page book-page-right" id="pageRight">
+                                                        <div class="blank-page w-full h-full" id="rightContent"></div>
+                                                    </div>
+                                                    <div class="flip-overlay" id="flipOverlay">
+                                                        <div class="flip-face flip-front"><img id="flipFrontImg" src="" alt=""></div>
+                                                        <div class="flip-face flip-back"><img id="flipBackImg" src="" alt=""></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button id="bookNext" onclick="bookFlipNext()" class="book-nav absolute right-2 md:relative md:right-auto z-30" aria-label="Halaman berikutnya">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                            </button>
+                                        </div>  
+                                        <div class="flex flex-col items-center gap-2 pb-4">
+                                            <div id="pageDots" class="flex items-center gap-1.5"></div>
+                                            <span id="pageIndicator" class="text-[10px] font-medium text-ink-400 tabular-nums"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Linktree Highlight Section -->
                         <div class="pt-10 space-y-4">
-                            {{-- <span class="text-[12px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Connect With Me On:</span> --}}
-                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">LET'S CONNECT</span>
+                            <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">LET'S CONNECT</span>
                             <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Connect With Me</h3>
-                            <div class="relative max-w-xl bg-mist-50 border border-cobalt/15 rounded-2xl p-4 space-y-0.5 premium-shadow overflow-hidden">
-                                <!-- Left Accent Bar -->
-                                <div class="absolute top-0 left-0 w-1 h-full linktree-accent rounded-l-2xl"></div>
+                            <div class="max-w-xl space-y-3">
                                 @if(isset($links) && $links->isNotEmpty())
                                     @foreach($links as $link)
-                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-cobalt/5 transition-all duration-300">
+                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-4 bg-mist-50 border border-cobalt/15 hover:border-cobalt/40 rounded-2xl premium-shadow hover:shadow-lg transition-all duration-300">
                                             <div class="flex items-center gap-3.5">
-                                                @php
-                                                    $isGeneric = empty($link->icon) || $link->icon === 'other';
-                                                @endphp
+                                                @php $isGeneric = empty($link->icon) || $link->icon === 'other'; @endphp
                                                 @if(!$isGeneric)
-                                                    <span class="w-6 h-6 flex items-center justify-center shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
+                                                    <span class="w-8 h-8 flex items-center justify-center shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
                                                         @include('components.icons.social', ['icon' => $link->icon, 'size' => 24])
                                                     </span>
                                                 @else
-                                                    <span class="w-6 h-6 rounded-md bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
-                                                        @include('components.icons.social', ['icon' => 'other', 'size' => 14])
+                                                    <span class="w-8 h-8 rounded-lg bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                        @include('components.icons.social', ['icon' => 'other', 'size' => 18])
                                                     </span>
                                                 @endif
                                                 <span class="font-bebas text-lg md:text-xl text-ink-800 group-hover:text-cobalt tracking-wider uppercase transition-colors duration-300">{{ $link->title }}</span>
@@ -400,24 +672,20 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                             </svg>
                                         </a>
-                                        @if(!$loop->last)
-                                            <div class="h-[1px] bg-gradient-to-r from-transparent via-cobalt/10 to-transparent mx-4 my-0.5"></div>
-                                        @endif
                                     @endforeach
                                 @else
-                                    <span class="text-sm text-ink-500 italic px-4 py-3 block">Tautan belum tersedia saat ini.</span>
+                                    <div class="bg-mist-50 border border-mist-300 p-6 rounded-2xl text-center">
+                                        <p class="text-sm text-ink-500 italic">Tautan belum tersedia saat ini.</p>
+                                    </div>
                                 @endif
                             </div>
                         </div>
                     </div>
 
-                    <!-- Profile Banner & Floating Stats (Right Side) — ORDER FIRST ON MOBILE -->
                     <div class="lg:col-span-5 flex justify-center relative order-first lg:order-none">
-                        <!-- Graphic Halo Background Ring in Blue representing orbit/forecasting -->
                         <div class="absolute inset-0 bg-gradient-to-tr from-cobalt/10 to-futura/5 rounded-full filter blur-3xl scale-90 -z-10"></div>
                         <div class="absolute w-[320px] h-[320px] rounded-full border-2 border-dashed border-cobalt/20 animate-[spin_40s_linear_infinite] top-[10%]"></div>
                         
-                        <!-- Main Cinematic Wide Portrait -->
                         <div class="relative w-[280px] h-[350px] md:w-[320px] md:h-[400px] rounded-[32px] overflow-hidden bg-mist-200 border-4 border-mist-50 premium-shadow">
                             @if(isset($user->profile_photo_path) && $user->profile_photo_path)
                                 <img src="{{ asset('storage/' . $user->profile_photo_path) }}" class="w-full h-full object-cover" alt="{{ $user->name }}">
@@ -429,7 +697,6 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-ink-900/30 to-transparent"></div>
                         </div>
 
-                        <!-- Floating Stat Badge -->
                         <div class="absolute bottom-10 -right-4 bg-mist-50 border border-mist-300 p-4 rounded-2xl premium-shadow flex flex-col items-center justify-center text-center w-28 h-28 transform rotate-6 hover:rotate-0 transition-all duration-500">
                             <span class="font-bebas text-4xl text-futura leading-none font-bold">{{ $user->experience_years ?? 0 }}+</span>
                             <span class="text-[9px] font-extrabold text-ink-700 uppercase tracking-widest mt-1">Years Experiences</span>
@@ -847,16 +1114,35 @@
             }
         }
 
-        // ==================== PDF PREVIEW ====================
+        // ==================== BOOK PREVIEW STATE ====================
+        const bookState = {
+            pages: [],
+            currentSpread: 0,
+            totalSpreads: 0,
+            totalPages: 0,
+            isFlipping: false,
+            isLoaded: false,
+            pdfUrl: null,
+            fallbackUrl: null,
+            isMobile: window.innerWidth < 768
+        };
+
+        // ==================== PDF PREVIEW (BOOK STYLE) ====================
         function toggleInlinePdfPreview(url) {
             const container = document.getElementById('inlinePdfContainer');
-            const frame = document.getElementById('pdfFrame');
             const btnText = document.getElementById('pdfPreviewBtnText');
             
             if (container.classList.contains('hidden')) {
-                frame.src = url;
                 container.classList.remove('hidden');
                 btnText.textContent = 'Hide Preview';
+                bookState.fallbackUrl = url;
+                
+                if (bookState.isLoaded && bookState.pdfUrl === url) {
+                    showBookView();
+                } else {
+                    bookState.pdfUrl = url;
+                    loadBookPdf(url);
+                }
             } else {
                 closeInlinePdfPreview();
             }
@@ -864,13 +1150,363 @@
 
         function closeInlinePdfPreview() {
             const container = document.getElementById('inlinePdfContainer');
-            const frame = document.getElementById('pdfFrame');
             const btnText = document.getElementById('pdfPreviewBtnText');
             
             container.classList.add('hidden');
-            frame.src = '';
-            btnText.textContent = 'Preview CV';
+            btnText.textContent = 'Preview {{ $user->resume_title ?? "CV" }}';
         }
+
+        function fallbackPdf() {
+            if (bookState.fallbackUrl) {
+                window.open(bookState.fallbackUrl, '_blank');
+            }
+        }
+
+        function showBookView() {
+            document.getElementById('bookLoading').classList.add('hidden');
+            document.getElementById('bookError').classList.add('hidden');
+            document.getElementById('bookView').classList.remove('hidden');
+            
+            bookState.currentSpread = 0;
+            sizeBookPages();
+            document.getElementById('flipOverlay').style.display = 'none';
+            renderSpread();
+        }
+
+        async function loadBookPdf(url) {
+            const loading = document.getElementById('bookLoading');
+            const error = document.getElementById('bookError');
+            const view = document.getElementById('bookView');
+            const progressFill = document.getElementById('bookProgressFill');
+            const loadText = document.getElementById('bookLoadText');
+            
+            loading.classList.remove('hidden');
+            error.classList.add('hidden');
+            view.classList.add('hidden');
+            
+            try {
+                if (typeof pdfjsLib === 'undefined') {
+                    await new Promise((resolve) => {
+                        const s = document.createElement('script');
+                        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                        s.onload = resolve;
+                        document.head.appendChild(s);
+                    });
+                }
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument(url).promise;
+                bookState.totalPages = pdf.numPages;
+                bookState.pages = [];
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width; canvas.height = viewport.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                    bookState.pages.push(canvas.toDataURL('image/jpeg', 0.9));
+                    progressFill.style.width = Math.round((i / pdf.numPages) * 100) + '%';
+                }
+
+                bookState.isLoaded = true;
+                bookState.isMobile = window.innerWidth < 768;
+                bookState.totalSpreads = bookState.isMobile ? pdf.numPages : Math.ceil((pdf.numPages + 1) / 2);
+                showBookView();
+            } catch (err) {
+                loading.classList.add('hidden');
+                error.classList.add('hidden');
+                document.getElementById('bookError').classList.remove('hidden');
+            }
+        }
+
+        function sizeBookPages() {
+            const isMobile = window.innerWidth < 768;
+            const container = document.getElementById('bookContainer');
+            const leftPage = document.getElementById('pageLeft');
+            const rightPage = document.getElementById('pageRight');
+            const spine = document.getElementById('bookSpine');
+            const flip = document.getElementById('flipOverlay');
+            
+            const containerWidth = container.clientWidth;
+            const maxHeight = isMobile ? 550 : 700;
+            const pageRatio = 842 / 595;
+
+            if (isMobile) {
+                leftPage.style.display = 'block';
+                leftPage.style.width = '12px';
+                leftPage.style.flexShrink = '0';
+                spine.style.display = 'block';
+                
+                const availW = containerWidth - 20;
+                let w = Math.min(availW, 400);
+                let h = w * pageRatio;
+                if (h > maxHeight) { h = maxHeight; w = h / pageRatio; }
+
+                rightPage.style.width = w + 'px';
+                rightPage.style.height = h + 'px';
+                leftPage.style.height = h + 'px';
+                flip.style.width = w + 'px';
+                flip.style.height = h + 'px';
+            } else {
+                leftPage.style.display = 'block';
+                spine.style.display = 'block';
+                const availWidth = containerWidth - 4;
+                const pageW = availWidth / 2;
+                let pageH = pageW * pageRatio;
+                if (pageH > maxHeight) {
+                    pageH = maxHeight;
+                    const adjustedW = pageH / pageRatio;
+                    leftPage.style.width = adjustedW + 'px';
+                    leftPage.style.height = pageH + 'px';
+                    rightPage.style.width = adjustedW + 'px';
+                    rightPage.style.height = pageH + 'px';
+                    flip.style.width = adjustedW + 'px';
+                    flip.style.height = pageH + 'px';
+                } else {
+                    leftPage.style.width = pageW + 'px';
+                    leftPage.style.height = pageH + 'px';
+                    rightPage.style.width = pageW + 'px';
+                    rightPage.style.height = pageH + 'px';
+                    flip.style.width = pageW + 'px';
+                    flip.style.height = pageH + 'px';
+                }
+            }
+        }
+
+        function renderSpread() {
+            const leftContent = document.getElementById('leftContent');
+            const rightContent = document.getElementById('rightContent');
+            const s = bookState.currentSpread;
+
+            if (bookState.isMobile) {
+                setPageContent(rightContent, bookState.pages[s], false);
+                setPageContent(leftContent, bookState.pages[s-1] || null, true);
+                document.getElementById('pageIndicator').textContent = `Halaman ${s + 1} / ${bookState.totalPages}`;
+            } else {
+                const leftIdx = s * 2 - 1;
+                const rightIdx = s * 2;
+                setPageContent(leftContent, bookState.pages[leftIdx] || null, true);
+                setPageContent(rightContent, bookState.pages[rightIdx] || null, false);
+                document.getElementById('pageIndicator').textContent = `Halaman ${leftIdx+1 > 0 ? leftIdx+1 : '-'}–${rightIdx+1} / ${bookState.totalPages}`;
+            }
+            updateNavButtons();
+            updateDots();
+        }
+
+        function setPageContent(el, img, isLeft = false) {
+            if (!img) {
+                el.innerHTML = '';
+                return;
+            }
+            if (isLeft) {
+                el.innerHTML = `<img src="${img}" style="width:100%;height:100%;object-fit:cover;object-position:right center;display:block;">`;
+            } else {
+                el.innerHTML = `<img src="${img}" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+            }
+        }
+
+        function updateNavButtons() {
+            document.getElementById('bookPrev').disabled = bookState.currentSpread <= 0 || bookState.isFlipping;
+            document.getElementById('bookNext').disabled = bookState.currentSpread >= bookState.totalSpreads - 1 || bookState.isFlipping;
+        }
+
+        function updateDots() {
+            const dots = document.getElementById('pageDots');
+            dots.innerHTML = '';
+            for(let i=0; i<bookState.totalSpreads; i++) {
+                const dot = document.createElement('div');
+                dot.className = `page-dot ${i === bookState.currentSpread ? 'active' : ''}`;
+                dot.onclick = () => goToSpread(i);
+                dots.appendChild(dot);
+            }
+        }
+
+        function goToSpread(idx) {
+            if (bookState.isFlipping || idx === bookState.currentSpread) return;
+            bookState.currentSpread = idx;
+            renderSpread();
+        }
+
+        function bookFlipNext() {
+            if (bookState.isFlipping || bookState.currentSpread >= bookState.totalSpreads - 1) return;
+            bookState.isFlipping = true;
+            updateNavButtons();
+
+            const flip = document.getElementById('flipOverlay');
+            const leftContent = document.getElementById('leftContent');
+            const rightContent = document.getElementById('rightContent');
+            const s = bookState.currentSpread;
+
+            flip.style.display = 'block';
+            flip.style.transition = 'none';
+            flip.style.right = '0';
+            flip.style.left = 'auto';
+            flip.style.transformOrigin = 'left center';
+            flip.style.transform = 'rotateY(0deg)';
+            
+            if (bookState.isMobile) {
+                setPageContent(leftContent, bookState.pages[s] || null, true);
+                setPageContent(rightContent, bookState.pages[s+1] || null, false);
+                document.getElementById('flipFrontImg').src = bookState.pages[s] || '';
+                document.getElementById('flipBackImg').src = bookState.pages[s+1] || '';
+            } else {
+                const leftIdx = s * 2 - 1;
+                const nextLeftIdx = (s + 1) * 2 - 1;
+                const nextRightIdx = (s + 1) * 2;
+
+                setPageContent(leftContent, leftIdx >= 0 ? bookState.pages[leftIdx] : null, true);
+                setPageContent(rightContent, bookState.pages[nextRightIdx] || null, false);
+
+                document.getElementById('flipFrontImg').src = bookState.pages[s*2] || '';
+                document.getElementById('flipBackImg').src = bookState.pages[nextLeftIdx] || '';
+            }
+            
+            flip.offsetHeight;
+            flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+            flip.style.transform = 'rotateY(-180deg)';
+
+            flip.addEventListener('transitionend', () => {
+                bookState.currentSpread++;
+                renderSpread();
+                flip.style.transform = '';
+                flip.style.transition = '';
+                flip.style.display = 'none';
+                bookState.isFlipping = false;
+            }, {once: true});
+        }
+
+        function bookFlipPrev() {
+            if (bookState.isFlipping || bookState.currentSpread <= 0) return;
+            bookState.isFlipping = true;
+            updateNavButtons();
+
+            const flip = document.getElementById('flipOverlay');
+            const leftContent = document.getElementById('leftContent');
+            const rightContent = document.getElementById('rightContent');
+            const s = bookState.currentSpread;
+
+            if (bookState.isMobile) {
+                // Mobile: Animasi menutup halaman (kebalikan dari flip next)
+                flip.style.display = 'block';
+                flip.style.transition = 'none';
+                flip.style.right = '0';
+                flip.style.left = 'auto';
+                flip.style.transformOrigin = 'left center';
+                
+                // Mulai dari posisi terbuka penuh di kiri (-180 derajat)
+                flip.style.transform = 'rotateY(-180deg)';
+
+                // PERBAIKAN: Jangan ubah isi rightContent ke halaman (s-1) dulu agar tidak mengintip.
+                // Biarkan latar belakang tetap memuat halaman aktif saat ini (s) agar terlihat alami saat ditutup.
+                setPageContent(rightContent, bookState.pages[s] || null, false);
+
+                // Sisi depan overlay adalah halaman tujuan (s-1), sisi belakang adalah halaman saat ini yang akan menutup (s)
+                document.getElementById('flipFrontImg').src = bookState.pages[s-1] || '';
+                document.getElementById('flipBackImg').src = bookState.pages[s] || '';
+
+                flip.offsetHeight; // force reflow
+
+                // Animasikan menutup kembali ke kanan (0 derajat)
+                flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+                flip.style.transform = 'rotateY(0deg)';
+                
+                // PERBAIKAN: Ubah isi halaman latar belakang setelah animasi penutupan berjalan setengah/hampir selesai
+                setTimeout(() => {
+                    setPageContent(rightContent, bookState.pages[s-1] || null, false);
+                }, 300); // Sinkron dengan pertengahan transisi 0.6s
+                
+            } else {
+                // Desktop: spread flip prev (swinging page from left to right)
+                flip.style.display = 'block';
+                flip.style.transition = 'none';
+                flip.style.left = '0';
+                flip.style.right = 'auto';
+                flip.style.transformOrigin = 'right center';
+                flip.style.transform = 'rotateY(0deg)';
+
+                const rightIdx = s * 2;
+                const prevLeftIdx = (s - 1) * 2 - 1;
+                const prevRightIdx = (s - 1) * 2;
+
+                setPageContent(leftContent, prevLeftIdx >= 0 ? bookState.pages[prevLeftIdx] : null, true);
+                setPageContent(rightContent, bookState.pages[rightIdx] || null, false);
+
+                document.getElementById('flipFrontImg').src = bookState.pages[s*2-1] || '';
+                document.getElementById('flipBackImg').src = bookState.pages[prevRightIdx] || '';
+                
+                setTimeout(() => {
+                    setPageContent(rightContent, bookState.pages[prevRightIdx] || null, false);
+                }, 300);
+
+                flip.offsetHeight; // force reflow
+
+                flip.style.transition = 'transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1)';
+                flip.style.transform = 'rotateY(180deg)';
+            }
+
+            flip.addEventListener('transitionend', () => {
+                bookState.currentSpread--;
+                renderSpread();
+                flip.style.transform = '';
+                flip.style.transition = '';
+                flip.style.display = 'none';
+                bookState.isFlipping = false;
+            }, {once: true});
+        }
+
+        // ==================== TOUCH/SWIPE FOR BOOK ====================
+        (function() {
+            let startX = 0, startTime = 0;
+            const bookView = document.getElementById('bookView');
+            bookView.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                startTime = Date.now();
+            }, { passive: true });
+
+            bookView.addEventListener('touchend', (e) => {
+                if (bookState.isFlipping) return;
+                const dx = e.changedTouches[0].clientX - startX;
+                const dy = e.changedTouches[0].clientY - startY;
+                const dt = Date.now() - startTime;
+
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 500) {
+                    if (dx < 0) bookFlipNext();
+                    else bookFlipPrev();
+                }
+            }, { passive: true });
+        })();
+
+        // ==================== KEYBOARD FOR BOOK ====================
+        document.addEventListener('keydown', (e) => {
+            const container = document.getElementById('inlinePdfContainer');
+            if (container.classList.contains('hidden')) return;
+
+            if (e.key === 'ArrowRight') { e.preventDefault(); bookFlipNext(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); bookFlipPrev(); }
+        });
+
+        // ==================== RESIZE HANDLER ====================
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (bookState.isLoaded && !document.getElementById('inlinePdfContainer').classList.contains('hidden')) {
+                    const wasMobile = bookState.isMobile;
+                    bookState.isMobile = window.innerWidth < 768;
+                    
+                    if (wasMobile !== bookState.isMobile) {
+                        bookState.totalSpreads = bookState.isMobile ? bookState.totalPages : Math.ceil(bookState.totalPages / 2);
+                        if (bookState.currentSpread >= bookState.totalSpreads) {
+                            bookState.currentSpread = bookState.totalSpreads - 1;
+                        }
+                        updateDots();
+                    }
+                    sizeBookPages();
+                    renderSpread();
+                }
+            }, 200);
+        });
 
         // ==================== CONTACT FORM SUBMIT ====================
         function submitContactForm(e) {
