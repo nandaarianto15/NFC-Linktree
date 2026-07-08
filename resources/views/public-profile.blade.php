@@ -372,7 +372,7 @@
 
                         <!-- Linktree Highlight Section -->
                         <div class="pt-10 space-y-4">
-                            <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">My Network Link</span>
+                            <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Connect With Me On:</span>
                             <div class="relative max-w-xl bg-mist-50 border border-cobalt/15 rounded-2xl p-4 space-y-0.5 premium-shadow overflow-hidden">
                                 <!-- Left Accent Bar -->
                                 <div class="absolute top-0 left-0 w-1 h-full linktree-accent rounded-l-2xl"></div>
