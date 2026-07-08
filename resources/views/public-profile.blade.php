@@ -372,7 +372,9 @@
 
                         <!-- Linktree Highlight Section -->
                         <div class="pt-10 space-y-4">
-                            <span class="text-[12px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Connect With Me On:</span>
+                            {{-- <span class="text-[12px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Connect With Me On:</span> --}}
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">LET'S CONNECT</span>
+                            <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Connect With Me</h3>
                             <div class="relative max-w-xl bg-mist-50 border border-cobalt/15 rounded-2xl p-4 space-y-0.5 premium-shadow overflow-hidden">
                                 <!-- Left Accent Bar -->
                                 <div class="absolute top-0 left-0 w-1 h-full linktree-accent rounded-l-2xl"></div>
