@@ -84,19 +84,9 @@
 
     {{-- OTHER / LAINNYA --}}
     @case('other')
-        <svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <rect width="24" height="24" rx="5" fill="#64748b"/>
-            <g transform="translate(3, 3) scale(0.75)">
-                <circle cx="6" cy="12" r="1.5" fill="white"/>
-                <circle cx="12" cy="12" r="1.5" fill="white"/>
-                <circle cx="18" cy="12" r="1.5" fill="white"/>
-            </g>
-        </svg>
-    @break
-
     {{-- DEFAULT: link icon (fallback) --}}
     @default
-        <svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
         </svg>

@@ -254,11 +254,14 @@
                         <div class="space-y-2.5">
                             @foreach($links as $link)
                                 <div class="group flex items-center gap-3.5 p-3.5 bg-white/50 dark:bg-white/[0.03] rounded-xl border border-slate-200/50 dark:border-white/[0.06] hover:bg-white/70 dark:hover:bg-white/[0.06] hover:border-sky-200/60 dark:hover:border-sky-500/20 transition-all duration-200">
-                                    <div class="w-9 h-9 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/[0.07] flex items-center justify-center shrink-0 transition-colors duration-200">
+                                    @php
+                                        $isGeneric = empty($link->icon) || $link->icon === 'other';
+                                    @endphp
+                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-200 {{ $isGeneric ? 'bg-sky-50 dark:bg-sky-500/10 text-sky-500 dark:text-sky-400/80' : 'bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/[0.07]' }}">
                                         @if($link->icon)
                                             @include('components.icons.social', ['icon' => $link->icon, 'size' => 18])
                                         @else
-                                            <svg class="w-[18px] h-[18px] text-sky-500 dark:text-sky-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                                                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                                             </svg>

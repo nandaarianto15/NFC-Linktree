@@ -380,12 +380,17 @@
                                     @foreach($links as $link)
                                         <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-cobalt/5 transition-all duration-300">
                                             <div class="flex items-center gap-3.5">
-                                                @if($link->icon)
-                                                    <span class="w-6 h-6 flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
-                                                        @include('components.icons.social', ['icon' => $link->icon, 'size' => 22])
+                                                @php
+                                                    $isGeneric = empty($link->icon) || $link->icon === 'other';
+                                                @endphp
+                                                @if(!$isGeneric)
+                                                    <span class="w-6 h-6 flex items-center justify-center shrink-0 opacity-90 group-hover:opacity-100 transition-opacity">
+                                                        @include('components.icons.social', ['icon' => $link->icon, 'size' => 24])
                                                     </span>
                                                 @else
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-cobalt/30 group-hover:bg-cobalt transition-colors duration-300 shrink-0"></span>
+                                                    <span class="w-6 h-6 rounded-md bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                        @include('components.icons.social', ['icon' => 'other', 'size' => 14])
+                                                    </span>
                                                 @endif
                                                 <span class="font-bebas text-lg md:text-xl text-ink-800 group-hover:text-cobalt tracking-wider uppercase transition-colors duration-300">{{ $link->title }}</span>
                                             </div>
@@ -393,6 +398,9 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                             </svg>
                                         </a>
+                                        @if(!$loop->last)
+                                            <div class="h-[1px] bg-gradient-to-r from-transparent via-cobalt/10 to-transparent mx-4 my-0.5"></div>
+                                        @endif
                                     @endforeach
                                 @else
                                     <span class="text-sm text-ink-500 italic px-4 py-3 block">Tautan belum tersedia saat ini.</span>
@@ -763,10 +771,14 @@
                                     <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Social</span>
                                     <div class="flex flex-wrap gap-3">
                                         @foreach($links as $link)
-                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                                </svg>
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all" title="{{ $link->title }}">
+                                                @if($link->icon)
+                                                    @include('components.icons.social', ['icon' => $link->icon, 'size' => 18])
+                                                @else
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                    </svg>
+                                                @endif
                                             </a>
                                         @endforeach
                                     </div>
