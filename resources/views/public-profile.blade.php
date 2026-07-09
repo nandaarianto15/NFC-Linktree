@@ -933,24 +933,51 @@
                 </div>
             </section>
 
-            <!-- CLIENTS LOGO SECTION (Menggantikan Testimonials) -->
-            <section id="testimonials" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-16 w-full">
-                <div class="flex items-center justify-between mb-10">
+            <!-- CLIENTS LOGO SECTION -->
+            <section id="testimonials" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-24 w-full">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
                     <div class="space-y-3">
-                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">CLIENTS</span>
-                        <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Trusted By</h3>
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block text-ink-500">CLIENTS</span>
+                        <h3 class="font-bebas text-5xl md:text-6xl font-black text-ink-900 tracking-wider">Trusted By</h3>
                     </div>
+                    <p class="text-xs font-medium text-ink-500 max-w-xs md:text-right leading-relaxed">
+                        Kolaborasi strategis yang telah kami bangun bersama berbagai mitra dan brand terpercaya.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 items-center">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-20 items-center">
                     @if(isset($clients) && $clients->isNotEmpty())
                         @foreach($clients as $client)
-                            <div class="flex items-center justify-center p-4 transition-all duration-300 hover:scale-105">
+                            <div class="flex flex-col items-center justify-center relative p-4 transition-all duration-300 group text-center JSON-container">
+                                
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out pointer-events-none">
+                                    <div class="w-24 h-24 bg-cobalt/20 rounded-full filter blur-xl transform scale-50 group-hover:scale-125 transition-transform duration-500 ease-out"></div>
+                                    <div class="absolute w-40 h-40 bg-cobalt/5 rounded-full filter blur-2xl transform scale-50 group-hover:scale-150 transition-transform duration-700 ease-out延迟-75"></div>
+                                </div>
+                                
                                 @if(isset($client->logo_path) && $client->logo_path)
-                                    <img src="{{ asset('storage/' . $client->logo_path) }}" class="max-h-16 w-auto object-contain" alt="{{ $client->name ?? 'Client Logo' }}">
+                                    <div class="h-32 md:h-48 w-full flex items-center justify-center mb-6 overflow-hidden relative z-10">
+                                        <img src="{{ asset('storage/' . $client->logo_path) }}" 
+                                             class="max-h-32 md:max-h-48 w-auto object-contain filter grayscale contrast-125 opacity-30 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 group-hover:drop-shadow-[0_10px_20px_rgba(var(--cobalt-rgb,0,102,204),0.15)] transition-all duration-500 ease-out" 
+                                             alt="{{ $client->name ?? 'Client Logo' }}">
+                                    </div>
+                                    
+                                    @if(isset($client->name))
+                                        <div class="flex flex-col items-center pt-2 w-full overflow-hidden relative z-10">
+                                            <span class="w-4 h-[2px] bg-ink-300 group-hover:w-16 group-hover:bg-cobalt group-hover:shadow-[0_0_8px_rgba(var(--cobalt-rgb,0,102,204),0.6)] transition-all duration-500 ease-out mb-2.5"></span>
+                                            
+                                            <p class="font-sans text-[10px] md:text-xs font-extrabold tracking-[0.25em] text-ink-500 uppercase transition-all duration-300 transform group-hover:translate-y-[-1px] group-hover:text-ink-900">
+                                                {{ $client->name }}
+                                            </p>
+                                        </div>
+                                    @endif
                                 @elseif(isset($client->name))
-                                    <span class="font-bebas text-2xl text-ink-700 tracking-wider">{{ $client->name }}</span>
+                                    <div class="flex flex-col items-center py-8 relative z-10">
+                                        <span class="font-bebas text-3xl md:text-4xl text-ink-400 group-hover:text-cobalt tracking-widest uppercase transition-colors duration-300 group-hover:drop-shadow-[0_0_12px_rgba(var(--cobalt-rgb,0,102,204),0.3)]">{{ $client->name }}</span>
+                                        <span class="w-8 h-[2px] bg-ink-300 mt-3 transform scale-x-50 group-hover:scale-x-125 group-hover:bg-cobalt transition-all duration-300"></span>
+                                    </div>
                                 @endif
+
                             </div>
                         @endforeach
                     @else
@@ -1348,7 +1375,7 @@
                 document.getElementById('flipFrontImg').src = bookState.pages[s] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[s+1] || '';
                 
-                // [NEXT UX]: Langsung render halaman tujuan di bawahnya agar langsung terlihat saat dibuka
+                // Mobile: Langsung tampilkan halaman tujuan di bawahnya agar langsung kelihatan saat dibuka
                 setPageContent(rightContent, bookState.pages[s+1] || null, false);
             } else {
                 const leftIdx = s * 2 - 1;
@@ -1358,7 +1385,8 @@
                 document.getElementById('flipFrontImg').src = bookState.pages[s*2] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[nextLeftIdx] || '';
 
-                // [NEXT UX]: Langsung pasang halaman tujuan berikutnya di balik lipatan overlay
+                // Desktop Next: Halaman kanan tujuan langsung di-render di background statis bawah overlay, 
+                // sedangkan halaman kiri lama tetap dipertahankan sampai lembaran menutupi sisi kiri.
                 setPageContent(leftContent, leftIdx >= 0 ? bookState.pages[leftIdx] : null, true);
                 setPageContent(rightContent, bookState.pages[nextRightIdx] || null, false);
             }
@@ -1397,18 +1425,17 @@
                 flip.style.transformOrigin = 'left center';
                 flip.style.transform = 'rotateY(-180deg)';
 
-                // Sisi depan (menghadap ke user saat membalik) memuat halaman s-1, belakang memuat halaman aktif s
                 document.getElementById('flipFrontImg').src = bookState.pages[s-1] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[s] || '';
 
-                // [PREV UX]: Kunci latar belakang statis tetap berada di halaman aktif saat ini (s)
-                // Jangan panggil setPageContent ke halaman s-1 disini agar tidak bocor duluan
+                // Mobile Prev: Pertahankan halaman aktif saat ini di bawah, isi baru muncul setelah selesai animasi menutup.
                 setPageContent(rightContent, bookState.pages[s] || null, false);
 
                 flip.offsetHeight; // Force reflow
                 flip.style.transition = 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)';
                 flip.style.transform = 'rotateY(0deg)';
             } else {
+                // DESKTOP PREV MODE (Membuka dari kiri ke kanan)
                 flip.style.left = '0';
                 flip.style.right = 'auto';
                 flip.style.transformOrigin = 'right center';
@@ -1418,12 +1445,18 @@
                 const prevLeftIdx = (s - 1) * 2 - 1;
                 const prevRightIdx = (s - 1) * 2;
 
+                // Lembaran pembalik: 
+                // Front (depan) memuat halaman kiri saat ini (s*2-1) yang akan diangkat ke kanan.
+                // Back (belakang) memuat halaman kanan tujuan (prevRightIdx) yang otomatis akan IKUT TERBUKA seiring rotasi 3D.
                 document.getElementById('flipFrontImg').src = bookState.pages[s*2-1] || '';
                 document.getElementById('flipBackImg').src = bookState.pages[prevRightIdx] || '';
 
-                // [PREV UX]: Kunci halaman kiri dan kanan ke spread aktif saat ini (s) 
-                // agar ketika lembaran disingkap dari kiri, halaman lama tidak langsung berganti secara gaib
-                setPageContent(leftContent, bookState.pages[s*2-1] || null, true);
+                // STRATEGI DESKTOP PREV: 
+                // Langsung pasang halaman KIRI tujuan di background statis sebelah kiri.
+                // Kunci halaman KANAN lama di background statis sebelah kanan.
+                // Dengan begini, saat kertas kiri diangkat, halaman kiri tujuan langsung terlihat di bawahnya,
+                // dan halaman kanan tujuan menempel di punggung kertas pembalik mengikuti rotasi animasi secara sinkron!
+                setPageContent(leftContent, prevLeftIdx >= 0 ? bookState.pages[prevLeftIdx] : null, true);
                 setPageContent(rightContent, bookState.pages[rightIdx] || null, false);
 
                 flip.offsetHeight; // Force reflow
@@ -1431,11 +1464,9 @@
                 flip.style.transform = 'rotateY(180deg)';
             }
 
-            // [PREV UX]: Halaman sebelumnya baru benar-benar dimunculkan ke dom utama 
-            // HANYA setelah transisi penutupan lembaran kertas selesai sepenuhnya.
             flip.addEventListener('transitionend', () => {
                 bookState.currentSpread--;
-                renderSpread(); // Fungsi ini akan memunculkan halaman s-1 dengan aman secara statis
+                renderSpread(); // Sinkronisasi akhir seluruh DOM statis
                 
                 flip.style.transform = '';
                 flip.style.transition = '';
