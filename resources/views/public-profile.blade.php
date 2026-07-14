@@ -1049,11 +1049,26 @@
                             @endif
 
                             @if(isset($user->phone) && $user->phone)
-                                <div class="space-y-2">
-                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Phone</span>
-                                    <a href="tel:{{ $user->phone }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium">{{ $user->phone }}</a>
-                                </div>
-                            @endif
+                                 <div class="space-y-2">
+                                     <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Phone</span>
+                                     <div class="flex items-center justify-between gap-2">
+                                         <a href="tel:{{ $user->phone }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium">{{ $user->phone }}</a>
+                                         <button data-name="{{ $user->name }}" 
+                                                 data-phone="{{ $user->phone }}" 
+                                                 data-email="{{ $user->email ?? '' }}" 
+                                                 data-title="{{ $user->title ?? '' }}" 
+                                                 data-location="{{ $user->location ?? '' }}" 
+                                                 data-url="{{ url()->current() }}"
+                                                 onclick="downloadVCard(this)" 
+                                                 class="w-7 h-7 rounded-lg bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all shrink-0" 
+                                                 title="Simpan Kontak">
+                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                             </svg>
+                                         </button>
+                                     </div>
+                                 </div>
+                             @endif
 
                             @if(isset($user->location) && $user->location)
                                 <div class="space-y-2">
@@ -1614,6 +1629,40 @@
             
             lastScrollY = currentScrollY;
         }, { passive: true });
+
+        // ==================== DOWNLOAD VCARD (SAVE CONTACT) ====================
+        function downloadVCard(btn) {
+            if (!btn) return;
+            const name = btn.getAttribute('data-name');
+            const phone = btn.getAttribute('data-phone');
+            const email = btn.getAttribute('data-email');
+            const title = btn.getAttribute('data-title');
+            const location = btn.getAttribute('data-location');
+            const url = btn.getAttribute('data-url');
+            
+            let vcard = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                'REV:' + new Date().toISOString(),
+                'FN:' + name,
+                'N:' + name + ';;;;',
+                'TEL;TYPE=CELL:' + phone
+            ];
+            if (email) vcard.push('EMAIL;TYPE=PREF,INTERNET:' + email);
+            if (title) vcard.push('TITLE:' + title);
+            if (location) vcard.push('ADR;TYPE=WORK:;;' + location + ';;;;');
+            if (url) vcard.push('URL:' + url);
+            vcard.push('END:VCARD');
+
+            const vcardContent = vcard.join('\r\n');
+            const blob = new Blob([vcardContent], { type: 'text/vcard;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = name.replace(/[^a-zA-Z0-9]/g, '_') + '.vcf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 
 </body>
