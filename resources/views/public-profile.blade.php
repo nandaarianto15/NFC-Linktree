@@ -364,9 +364,18 @@
             border-radius: 8px;
             opacity: 0.5;
         }
+
+        /* Let's Talk Bubble Pin Animation */
+        .bubble-pin {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+        .bubble-pin.hit-boundary {
+            transform: scale(0.85) translateY(6px);
+            opacity: 0.8;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-mist-100 font-sans antialiased text-ink-800 selection:bg-cobalt selection:text-white analytic-grid">
+<body class="relative min-h-screen bg-mist-100 font-sans antialiased text-ink-800 selection:bg-cobalt selection:text-white analytic-grid">
 
     <!-- MOBILE SIDEBAR DRAWER (Hidden on Desktop, used only for Mobile Menu Drawer) -->
     <aside id="sidebarDrawer" class="fixed inset-y-0 left-0 z-50 w-80 bg-mist-200 border-r border-mist-300 matrix-bg flex flex-col justify-between p-6 overflow-y-auto transform -translate-x-full lg:hidden smooth-transition shadow-2xl">
@@ -483,7 +492,7 @@
     </aside>
 
     <!-- FLOATING LET'S TALK BUBBLE (MOBILE ONLY) WITH BLUE GRADIENT -->
-    <a href="#contact" class="lg:hidden fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-cobalt to-futura text-mist-50 shadow-2xl hover:scale-110 active:scale-95 transition-all">
+    <a id="mobileLetsTalkBubble" href="#contact" class="lg:hidden fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-cobalt to-futura text-mist-50 shadow-2xl hover:scale-110 active:scale-95 transition-all bubble-pin">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
@@ -654,7 +663,11 @@
                             <div class="max-w-xl space-y-3">
                                 @if(isset($links) && $links->isNotEmpty())
                                     @foreach($links as $link)
-                                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-4 bg-mist-50 border border-cobalt/15 hover:border-cobalt/40 rounded-2xl premium-shadow hover:shadow-lg transition-all duration-300">
+                                        @if($link->icon === 'whatsapp')
+                                            <a href="javascript:void(0)" onclick="openWhatsappModal('{{ $link->url }}')" class="group flex items-center justify-between p-4 bg-mist-50 border border-cobalt/15 hover:border-cobalt/40 rounded-2xl premium-shadow hover:shadow-lg transition-all duration-300">
+                                        @else
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-4 bg-mist-50 border border-cobalt/15 hover:border-cobalt/40 rounded-2xl premium-shadow hover:shadow-lg transition-all duration-300">
+                                        @endif
                                             <div class="flex items-center gap-3.5">
                                                 @php $isGeneric = empty($link->icon) || $link->icon === 'other'; @endphp
                                                 @if(!$isGeneric)
@@ -1012,16 +1025,27 @@
                         <form id="contactForm" method="POST" action="{{ route('messages.public.store', $user->profile_token ?? 'default') }}" onsubmit="submitContactForm(event)" class="space-y-5 text-xs font-bold uppercase tracking-wider text-ink-700">
                             @csrf
                             <div class="space-y-1.5">
-                                <label for="senderName" class="block text-ink-500 text-[10px] tracking-widest">Your Name</label>
+                                <label for="senderName" class="block text-ink-500 text-[10px] tracking-widest">Nama Lengkap</label>
                                 <input type="text" id="senderName" name="name" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="John Doe">
                             </div>
                             <div class="space-y-1.5">
                                 <label for="senderEmail" class="block text-ink-500 text-[10px] tracking-widest">Email Address</label>
                                 <input type="email" id="senderEmail" name="email" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="john@example.com">
                             </div>
+                            <!-- Perusahaan & Asal Kota samping menyamping -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label for="senderCompany" class="block text-ink-500 text-[10px] tracking-widest">Perusahaan / Instansi</label>
+                                    <input type="text" id="senderCompany" name="company" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="SAKA Alenkosa">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label for="senderCity" class="block text-ink-500 text-[10px] tracking-widest">Asal Kota</label>
+                                    <input type="text" id="senderCity" name="city" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="Jakarta">
+                                </div>
+                            </div>
                             <div class="space-y-1.5">
-                                <label for="senderMessage" class="block text-ink-500 text-[10px] tracking-widest">Message</label>
-                                <textarea id="senderMessage" name="message" rows="4" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors resize-none" placeholder="Tell me about your project..."></textarea>
+                                <label for="senderMessage" class="block text-ink-500 text-[10px] tracking-widest">Penjelasan Proyek</label>
+                                <textarea id="senderMessage" name="message" rows="4" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors resize-none" placeholder="Jelaskan kebutuhan proyek Anda..."></textarea>
                             </div>
                             <button type="submit" id="contactSubmitBtn" class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ink-900 hover:bg-cobalt text-mist-100 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg">
                                 <span>Send Message</span>
@@ -1049,26 +1073,11 @@
                             @endif
 
                             @if(isset($user->phone) && $user->phone)
-                                 <div class="space-y-2">
-                                     <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Phone</span>
-                                     <div class="flex items-center justify-between gap-2">
-                                         <a href="tel:{{ $user->phone }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium">{{ $user->phone }}</a>
-                                         <button data-name="{{ $user->name }}" 
-                                                 data-phone="{{ $user->phone }}" 
-                                                 data-email="{{ $user->email ?? '' }}" 
-                                                 data-title="{{ $user->title ?? '' }}" 
-                                                 data-location="{{ $user->location ?? '' }}" 
-                                                 data-url="{{ url()->current() }}"
-                                                 onclick="downloadVCard(this)" 
-                                                 class="w-7 h-7 rounded-lg bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all shrink-0" 
-                                                 title="Simpan Kontak">
-                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                             </svg>
-                                         </button>
-                                     </div>
-                                 </div>
-                             @endif
+                                <div class="space-y-2">
+                                    <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Phone</span>
+                                    <a href="tel:{{ $user->phone }}" class="text-sm text-ink-800 hover:text-cobalt transition-colors font-medium">{{ $user->phone }}</a>
+                                </div>
+                            @endif
 
                             @if(isset($user->location) && $user->location)
                                 <div class="space-y-2">
@@ -1082,7 +1091,11 @@
                                     <span class="text-[9px] font-extrabold tracking-widest text-ink-500 uppercase block">Social</span>
                                     <div class="flex flex-wrap gap-3">
                                         @foreach($links as $link)
-                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all" title="{{ $link->title }}">
+                                            @if($link->icon === 'whatsapp')
+                                                <a href="javascript:void(0)" onclick="openWhatsappModal('{{ $link->url }}')" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all" title="{{ $link->title }}">
+                                            @else
+                                                <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-mist-100 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-cobalt hover:border-cobalt transition-all" title="{{ $link->title }}">
+                                            @endif
                                                 @if($link->icon)
                                                     @include('components.icons.social', ['icon' => $link->icon, 'size' => 18])
                                                 @else
@@ -1096,6 +1109,42 @@
                                 </div>
                             @endif
                         </div>
+
+                        <!-- Save Contact CTA -->
+                        @if(isset($user->phone) && $user->phone)
+                            <div class="mt-8 pt-6 border-t border-mist-300">
+                                <button data-name="{{ $user->name }}" 
+                                        data-phone="{{ $user->phone }}" 
+                                        data-email="{{ $user->email ?? '' }}" 
+                                        data-title="{{ $user->title ?? '' }}" 
+                                        data-location="{{ $user->location ?? '' }}" 
+                                        data-url="{{ url()->current() }}"
+                                        onclick="downloadVCard(this)" 
+                                        class="group relative w-full flex items-center gap-3.5 px-5 py-4 bg-gradient-to-tr from-cobalt to-futura hover:scale-[1.02] rounded-2xl transition-all duration-300 overflow-hidden shadow-md">
+                                    <!-- Subtle gradient shimmer -->
+                                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                                    
+                                    <!-- Icon container -->
+                                    <div class="relative shrink-0 w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors duration-300">
+                                        <svg class="w-5 h-5 text-mist-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <!-- Text -->
+                                    <div class="relative text-left">
+                                        <span class="block text-mist-50 text-[11px] font-extrabold tracking-widest uppercase leading-tight">Save Contact</span>
+                                    </div>
+                                    
+                                    <!-- Arrow -->
+                                    <div class="relative ml-auto shrink-0">
+                                        <svg class="w-4 h-4 text-mist-50/70 group-hover:text-mist-50 group-hover:translate-y-0.5 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </div>
+                        @endif
                     </div>
 
                 </div>
@@ -1110,6 +1159,55 @@
             </footer>
 
         </main>
+    </div>
+
+    <!-- WHATSAPP MODAL -->
+    <div id="whatsappModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-ink-900/60 backdrop-blur-sm" onclick="closeWhatsappModal()"></div>
+        <div class="relative flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-mist-50 border border-mist-300 rounded-3xl w-full max-w-lg premium-shadow p-8">
+                <div class="flex justify-between items-center border-b border-mist-300 pb-4 mb-5">
+                    <div>
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">HUBUNGI VIA WHATSAPP</span>
+                        <h3 class="font-bebas text-3xl font-black text-ink-900 tracking-wider">Kirim Pesan WhatsApp</h3>
+                    </div>
+                    <button onclick="closeWhatsappModal()" class="w-10 h-10 rounded-xl bg-mist-200 border border-mist-300 flex items-center justify-center text-ink-500 hover:text-ink-900 hover:border-cobalt transition-all">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="whatsappForm" onsubmit="submitWhatsappForm(event)" class="space-y-5 text-xs font-bold uppercase tracking-wider text-ink-700">
+                    <input type="hidden" id="waLinkUrl" value="">
+                    <div class="space-y-1.5">
+                        <label for="waSenderName" class="block text-ink-500 text-[10px] tracking-widest">Nama Lengkap</label>
+                        <input type="text" id="waSenderName" name="name" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="John Doe">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="waSenderEmail" class="block text-ink-500 text-[10px] tracking-widest">Email Address</label>
+                        <input type="email" id="waSenderEmail" name="email" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="john@example.com">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="waSenderCompany" class="block text-ink-500 text-[10px] tracking-widest">Perusahaan / Instansi</label>
+                        <input type="text" id="waSenderCompany" name="company" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="Acme Corp">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="waSenderCity" class="block text-ink-500 text-[10px] tracking-widest">Asal Kota</label>
+                        <input type="text" id="waSenderCity" name="city" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="Jakarta">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="waSenderMessage" class="block text-ink-500 text-[10px] tracking-widest">Penjelasan Proyek</label>
+                        <textarea id="waSenderMessage" name="message" rows="4" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors resize-none" placeholder="Jelaskan kebutuhan proyek Anda..."></textarea>
+                    </div>
+                    <button type="submit" id="waSubmitBtn" class="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-ink-900 hover:bg-cobalt text-mist-100 font-extrabold text-[10px] uppercase tracking-widest rounded-xl transition-all shadow-lg">
+                        <span>Send Message & Chat WA</span>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- ALL PROJECTS MODAL -->
@@ -1605,6 +1703,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeAllProjectsModal();
+                closeWhatsappModal();
                 const drawer = document.getElementById('sidebarDrawer');
                 if (!drawer.classList.contains('-translate-x-full')) {
                     toggleMobileSidebar();
@@ -1612,19 +1711,46 @@
             }
         });
 
-        // ==================== MOBILE NAVBAR SCROLL BEHAVIOR ====================
+        // ==================== MOBILE NAVBAR SCROLL BEHAVIOR & BUBBLE PINNING ====================
         let lastScrollY = 0;
         const mobileNavbar = document.getElementById('mobileNavbar');
         
         window.addEventListener('scroll', function() {
             const currentScrollY = window.scrollY;
             
+            // Mobile Navbar styling on scroll
             if (currentScrollY > 100) {
                 mobileNavbar.classList.add('shadow-md');
                 mobileNavbar.style.backgroundColor = 'rgba(244, 246, 250, 0.95)';
             } else {
                 mobileNavbar.classList.remove('shadow-md');
                 mobileNavbar.style.backgroundColor = '';
+            }
+            
+            // Let's Talk Bubble Pinning Logic
+            const bubble = document.getElementById('mobileLetsTalkBubble');
+            const contactSection = document.getElementById('contact');
+            if (bubble && contactSection) {
+                const contactTop = contactSection.offsetTop;
+                const windowHeight = window.innerHeight;
+                
+                // Bubble height is 56px (w-14 h-14)
+                // Bottom spacing is 24px (bottom-6)
+                const bubbleHeight = 56;
+                const bottomSpacing = 24;
+                const threshold = contactTop - bubbleHeight - bottomSpacing;
+                
+                if (currentScrollY + windowHeight - bottomSpacing - bubbleHeight >= contactTop) {
+                    bubble.style.position = 'absolute';
+                    bubble.style.top = threshold + 'px';
+                    bubble.style.bottom = 'auto';
+                    bubble.classList.add('hit-boundary');
+                } else {
+                    bubble.style.position = 'fixed';
+                    bubble.style.top = 'auto';
+                    bubble.style.bottom = '24px';
+                    bubble.classList.remove('hit-boundary');
+                }
             }
             
             lastScrollY = currentScrollY;
@@ -1658,10 +1784,94 @@
             const blob = new Blob([vcardContent], { type: 'text/vcard;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = name.replace(/[^a-zA-Z0-9]/g, '_') + '.vcf';
+            link.download = 'kontak.vcf';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // ==================== WHATSAPP MODAL FUNCTIONS ====================
+        function openWhatsappModal(url) {
+            document.getElementById('waLinkUrl').value = url;
+            document.getElementById('whatsappModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeWhatsappModal() {
+            document.getElementById('whatsappModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function submitWhatsappForm(e) {
+            e.preventDefault();
+            const form = document.getElementById('whatsappForm');
+            const btn = document.getElementById('waSubmitBtn');
+            const name = document.getElementById('waSenderName').value;
+            const email = document.getElementById('waSenderEmail').value;
+            const company = document.getElementById('waSenderCompany').value;
+            const city = document.getElementById('waSenderCity').value;
+            const message = document.getElementById('waSenderMessage').value;
+            const waUrl = document.getElementById('waLinkUrl').value;
+            
+            btn.innerHTML = '<span>Sending...</span>';
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+
+            // 1. Submit to database via AJAX
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('company', company);
+            formData.append('city', city);
+            formData.append('message', message);
+
+            fetch("{{ route('messages.public.store', $user->profile_token ?? 'default') }}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // 2. Open WhatsApp in new tab with template (without email)
+                    const publicProfileName = {!! json_encode($user->name) !!};
+                    const waText = `Halo ${publicProfileName}, saya ingin berdiskusi mengenai proyek yang ingin kami buat. Berikut detail singkat kami:\n\nNama: ${name}\nPerusahaan/Instansi: ${company}\nKota: ${city}\n\n${message}\n\nMohon info waktu luang Anda untuk berdiskusi lebih lanjut. Terima kasih`;
+                    
+                    let finalUrl = waUrl;
+                    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+                        finalUrl = 'https://' + finalUrl;
+                    }
+                    try {
+                        const urlObj = new URL(finalUrl);
+                        urlObj.searchParams.set('text', waText);
+                        finalUrl = urlObj.toString();
+                    } catch (err) {
+                        if (finalUrl.includes('?')) {
+                            finalUrl = finalUrl + '&text=' + encodeURIComponent(waText);
+                        } else {
+                            finalUrl = finalUrl + '?text=' + encodeURIComponent(waText);
+                        }
+                    }
+
+                    window.open(finalUrl, '_blank');
+                    
+                    // Reset and close
+                    form.reset();
+                    closeWhatsappModal();
+                } else {
+                    alert('Gagal mengirim pesan. Silakan coba lagi.');
+                }
+            })
+            .catch(() => {
+                alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
+            })
+            .finally(() => {
+                btn.innerHTML = '<span>Send Message & Chat WA</span>';
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            });
         }
     </script>
 

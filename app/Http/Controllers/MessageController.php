@@ -42,13 +42,19 @@ class MessageController extends Controller
         $request->validate([
             'name'    => 'required|string|max:255',
             'email'   => 'required|email|max:255',
+            'company' => 'required|string|max:255',
+            'city'    => 'required|string|max:255',
             'message' => 'required|string|max:2000',
         ]);
+
+        $formattedMessage = "Perusahaan/Instansi: " . $request->company . "\n" .
+                             "Asal Kota: " . $request->city . "\n\n" .
+                             "Penjelasan Proyek:\n" . $request->message;
 
         $user->messages()->create([
             'name'    => $request->name,
             'email'   => $request->email,
-            'message' => $request->message,
+            'message' => $formattedMessage,
         ]);
 
         return response()->json([
