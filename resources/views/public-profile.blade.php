@@ -950,12 +950,12 @@
             <section id="testimonials" class="border-t border-mist-300 max-w-7xl mx-auto px-6 md:px-12 py-24 w-full">
                 <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
                     <div class="space-y-3">
-                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block text-ink-500">CLIENTS</span>
+                        <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">CLIENTS</span>
                         <h3 class="font-bebas text-5xl md:text-6xl font-black text-ink-900 tracking-wider">Trusted By</h3>
                     </div>
-                    <p class="text-xs font-medium text-ink-500 max-w-xs md:text-right leading-relaxed">
+                    {{-- <p class="text-xs font-medium text-ink-500 max-w-xs md:text-right leading-relaxed">
                         Kolaborasi strategis yang telah kami bangun bersama berbagai mitra dan brand terpercaya.
-                    </p>
+                    </p> --}}
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-14 md:gap-x-12 md:gap-y-20 items-center">
@@ -1189,7 +1189,7 @@
                     </div>
                     <div class="space-y-1.5">
                         <label for="waSenderCompany" class="block text-ink-500 text-[10px] tracking-widest">Perusahaan / Instansi</label>
-                        <input type="text" id="waSenderCompany" name="company" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="Acme Corp">
+                        <input type="text" id="waSenderCompany" name="company" required class="w-full px-4 py-3 bg-mist-100 border border-mist-300 rounded-xl text-ink-800 text-sm font-medium focus:outline-none focus:border-cobalt transition-colors" placeholder="SAKA Alenkosa">
                     </div>
                     <div class="space-y-1.5">
                         <label for="waSenderCity" class="block text-ink-500 text-[10px] tracking-widest">Asal Kota</label>
