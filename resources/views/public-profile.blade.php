@@ -660,8 +660,31 @@
                         <div class="pt-10 space-y-4">
                             <span class="text-xs font-extrabold tracking-[0.3em] text-futura uppercase block">LET'S CONNECT</span>
                             <h3 class="font-bebas text-5xl font-black text-ink-900 tracking-wider">Connect With Me</h3>
-                            <div class="max-w-xl space-y-3">
-                                @if(isset($links) && $links->isNotEmpty())
+                             <div class="max-w-xl space-y-3">
+                                 @if(isset($user->phone) && $user->phone)
+                                     <button data-name="{{ $user->name }}" 
+                                             data-phone="{{ $user->phone }}" 
+                                             data-email="{{ $user->email ?? '' }}" 
+                                             data-title="{{ $user->title ?? '' }}" 
+                                             data-location="{{ $user->location ?? '' }}" 
+                                             data-url="{{ url()->current() }}"
+                                             onclick="downloadVCard(this)" 
+                                             class="group flex items-center justify-between w-full p-4 bg-gradient-to-r from-cobalt to-futura text-mist-50 rounded-2xl premium-shadow hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
+                                         <div class="flex items-center gap-3.5">
+                                             <span class="w-8 h-8 rounded-lg bg-white/20 text-white flex items-center justify-center shrink-0">
+                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                 </svg>
+                                             </span>
+                                             <span class="font-bebas text-lg md:text-xl text-white tracking-wider uppercase">Save Contact</span>
+                                         </div>
+                                         <svg class="w-4 h-4 text-white/80 group-hover:text-white transition-all duration-300 group-hover:translate-y-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                         </svg>
+                                     </button>
+                                 @endif
+
+                                 @if(isset($links) && $links->isNotEmpty())
                                     @foreach($links as $link)
                                         @if($link->icon === 'whatsapp')
                                             <a href="javascript:void(0)" onclick="openWhatsappModal('{{ $link->url }}')" class="group flex items-center justify-between p-4 bg-mist-50 border border-cobalt/15 hover:border-cobalt/40 rounded-2xl premium-shadow hover:shadow-lg transition-all duration-300">
@@ -1006,7 +1029,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                     
                     <!-- Left Grid Card Promo -->
-                    <div class="lg:col-span-4 bg-gradient-to-tr from-cobalt to-futura text-mist-50 p-8 rounded-3xl flex flex-col justify-between premium-shadow relative overflow-hidden">
+                    <div class="lg:col-span-6 bg-gradient-to-tr from-cobalt to-futura text-mist-50 p-8 rounded-3xl flex flex-col justify-between premium-shadow relative overflow-hidden">
                         <div class="absolute -right-12 -top-12 w-32 h-32 rounded-full bg-white/5 blur-2xl"></div>
                         <div class="space-y-4">
                             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
@@ -1020,7 +1043,7 @@
                         <span class="text-[10px] font-extrabold tracking-widest uppercase text-white/50 mt-12 block">SAKA | ALENKOSA  &copy; 2026</span>
                     </div>
 
-                    <!-- Middle Grid Interactive Mail Form -->
+                    {{-- Middle Grid Interactive Mail Form (Commented out as requested)
                     <div class="lg:col-span-5 bg-mist-50 border border-mist-300 p-8 rounded-3xl premium-shadow">
                         <form id="contactForm" method="POST" action="{{ route('messages.public.store', $user->profile_token ?? 'default') }}" onsubmit="submitContactForm(event)" class="space-y-5 text-xs font-bold uppercase tracking-wider text-ink-700">
                             @csrf
@@ -1059,9 +1082,10 @@
                             <span class="text-xs font-bold text-cobalt">Pesan berhasil dikirim! Terima kasih.</span>
                         </div>
                     </div>
+                    --}}
 
                     <!-- Right Grid Contact Info -->
-                    <div class="lg:col-span-3 bg-mist-50 border border-mist-300 p-8 rounded-3xl premium-shadow flex flex-col justify-between">
+                    <div class="lg:col-span-6 bg-mist-50 border border-mist-300 p-8 rounded-3xl premium-shadow flex flex-col justify-between">
                         <div class="space-y-6">
                             <span class="text-[9px] font-extrabold tracking-[0.25em] text-ink-500 uppercase block">Get in Touch</span>
                             
@@ -1109,42 +1133,6 @@
                                 </div>
                             @endif
                         </div>
-
-                        <!-- Save Contact CTA -->
-                        @if(isset($user->phone) && $user->phone)
-                            <div class="mt-8 pt-6 border-t border-mist-300">
-                                <button data-name="{{ $user->name }}" 
-                                        data-phone="{{ $user->phone }}" 
-                                        data-email="{{ $user->email ?? '' }}" 
-                                        data-title="{{ $user->title ?? '' }}" 
-                                        data-location="{{ $user->location ?? '' }}" 
-                                        data-url="{{ url()->current() }}"
-                                        onclick="downloadVCard(this)" 
-                                        class="group relative w-full flex items-center gap-3.5 px-5 py-4 bg-gradient-to-tr from-cobalt to-futura hover:scale-[1.02] rounded-2xl transition-all duration-300 overflow-hidden shadow-md">
-                                    <!-- Subtle gradient shimmer -->
-                                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                                    
-                                    <!-- Icon container -->
-                                    <div class="relative shrink-0 w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors duration-300">
-                                        <svg class="w-5 h-5 text-mist-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                        </svg>
-                                    </div>
-                                    
-                                    <!-- Text -->
-                                    <div class="relative text-left">
-                                        <span class="block text-mist-50 text-[11px] font-extrabold tracking-widest uppercase leading-tight">Save Contact</span>
-                                    </div>
-                                    
-                                    <!-- Arrow -->
-                                    <div class="relative ml-auto shrink-0">
-                                        <svg class="w-4 h-4 text-mist-50/70 group-hover:text-mist-50 group-hover:translate-y-0.5 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                    </div>
-                                </button>
-                            </div>
-                        @endif
                     </div>
 
                 </div>
